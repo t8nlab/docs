@@ -1,236 +1,112 @@
 ---
 title: 9. Production Deployment
-description: Build and deploy Titan as a single native Rust binary without Node.js in production.
+description: Learn how to bundle, distribute, and secure your TitanPL application for high-performance production environments.
 ---
 
 import { Steps, Step } from "fumadocs-ui/components/steps";
 import { Callout } from "fumadocs-ui/components/callout";
-import { Files, Folder, File } from "fumadocs-ui/components/files";
 
-Titan production builds generate highly-optimized bundles designed to run on the **Titan Engine**.  
-You do not need to compile any Rust code yourself.
-
-JavaScript is executed via an embedded **V8 runtime** within the engine, while **all networking, concurrency, and async execution are handled by Rust**.
+TitanPL is designed for high-performance production environments. Its deployment process ensures that all security policies, extensions, and pre-computed routes are packed into a portable, production-ready bundle.
 
 ---
 
-## 🏗️ Production Build
+## 🏗️ Production Build (`titan build --release`)
 
-From your Titan project root, run:
+The `titan build --release` command is the standard way to package your application for production.
 
-```bash
-npm run build
-````
-
-<Steps>
-  <Step title="Action Discovery">
-    Titan locates your route definitions and actions in `app/`.
-  </Step>
-
-<Step title="Bundle actions">
-All JavaScript/TypeScript actions are aggressively optimized, tree-shaken, and bundled by `@titanpl/packet`.
-</Step>
-
-<Step title="Emit to dist">
-The finalized artifacts are emitted to the `dist/` directory, ready to be consumed by the Engine.
-</Step> </Steps>
-
-On success, you will see output similar to:
-
-```text
-★ Titan Packet: Building production output...
-→ Bundling actions...
-→ Emitting to dist/...
-✔ Titan production build complete!
-```
+### What it Does:
+1.  **V8 Bundle**: Minifies and bundles all your actions into a single optimized runtime.
+2.  **Route Pre-computation**: Generates a static map of all actions for faster startup.
+3.  **Security Assets**: Automatically copies `tanfig.json` and `package.json` to the distribution.
+4.  **Extension Bundling**: Scans `node_modules` for any `titan.json` files and copies the entire extension tree into a specialized `.ext/` directory.
+5.  **Binary Extraction**: Pulls the correct platform-specific engine binary into the bundle root.
 
 ---
 
-## 📦 Build Output
+## 🛠️ Custom Assets & Build Configuration
 
-After the build completes, the final artifact is located at:
+You can control which folders and files are carried over to your production `build/` folder by adding a `build` block to your `tanfig.json`.
 
-<Files>
-  <Folder name="dist" defaultOpen>
-    <File name="app.js" />
-    <File name="routes.json" />
-  </Folder>
-</Files>
-
-This directory contains your **entire backend logic**, ready to be loaded by the Engine.
-
-No Rust compilation needed.
-No native build toolchains on your server.
-
----
-
-## 🚀 Deployment
-
-<Callout type="info">
-  Deploying a Titan application is as simple as deploying your `dist/` folder and `package.json`.
-</Callout>
-
-### Typical deployment flow
-
-1. Run `npm run build` locally or in CI
-2. Upload the `dist/` folder and `package.json` to your server
-3. Run `npm install --omit=dev` (installs the engine binary natively)
-4. Start the server using `npm run start`
-
-That’s it.
-
-<Callout type="info">
-  **Production Tip:** To ensure cross-platform stability, you can manually add the engine packages to your `optionalDependencies` in `package.json`. This ensures the correct binary is available for your production environment.
-  
-  ```json
-  "optionalDependencies": {
-    "@titanpl/engine-linux-x64": "2.0.5",
-    "@titanpl/engine-win32-x64": "2.0.3"
+```json
+{
+  "name": "my-app",
+  "build": {
+    "files": ["public", "static", "db", "certs", "custom-assets"],
+    "env": "production"
   }
-  ```
-</Callout>
-
-Works on:
-
-* Any Node.js-capable VPS
-* Bare metal
-* Docker / Cloud Containers
-* Any platform supporting native binaries
-
----
-
-## ▶️ Running in Production
-
-Run the engine:
-
-```bash
-npm run start
+}
 ```
 
-Titan instantly boots the pre-compiled Titan Engine pointing to your `dist/` folder, primed for maximum throughput.
+### Supported Fields:
+- `files`: An array of folder/file names in your project root to copy into the `build/` directory. By default, TitanPL copies `public`, `static`, `db`, and `tanfig.json`.
+- `env`: Set to `production` or `deploy` to disable the creation of local symlinks in favor of a clean, standalone file structure.
 
 ---
 
-## 🐳 Docker (Already Provided)
+## 🛡️ Production Safety Management
 
-<Callout type="info">
-  Titan projects ship with a <strong>fully ready Dockerfile</strong>.  
-  You do not need to write or configure anything.
-</Callout>
+Deploying TitanPL to Docker is straightforward because the `build/` directory is self-contained.
 
-If you choose Docker, this is all you do:
+### Sample `Dockerfile`:
+```dockerfile
+# Step 1: Build the app
+FROM node:20-slim AS builder
+WORKDIR /app
+COPY . .
+RUN npm install -g @titanpl/cli
+RUN npm install
+RUN titan build --release
 
-```bash
-titan build
-docker build -t titan-app .
-docker run -p 3000:3000 titan-app
+# Step 2: Runtime image
+FROM debian:stable-slim
+WORKDIR /app
+
+# Copy the generated build folder
+COPY --from=builder /app/build /app/
+
+# Environment setup
+ENV TITAN_DEV=0
+ENV PORT=5105
+
+# Start the TitanPL engine directly
+CMD ["./titan-server", "run", "dist"]
 ```
 
-Nothing else.
+---
 
-No Node.js image.
-No multi-stage hacks.
-No runtime JS.
+## 🛡️ Critical Security Checklist
 
-Docker is **optional**, not required.
+Before deploying to production, ensure the following are correct:
+
+### 1. `tanfig.json` Checklist
+- [ ] `allowNative` only contains extensions you trust.
+- [ ] `allowWasm` is only `true` if your extensions rely on it.
+- [ ] Your project `name` in `tanfig.json` matches the root configuration.
+
+### 2. Engine Visibility
+- Titan-native host processes run out-of-process for security. If you are using a firewall or restrictive OS policy, ensure IPC pipes from the engine to its spawned sub-processes are allowed.
 
 ---
 
-## ⚡ JavaScript Runtime in Production (V8)
+## 🚀 Execution in Production
+
+Once your `build/` folder is on the server, you can start it with zero external dependencies:
+
+```bash
+cd build
+./titan-server run dist
+```
 
 <Callout type="info">
-  Gravity does <strong>not</strong> limit your backend performance.
+  **Zero-Downtime:** Use a process manager like `pm2` to monitor the `titan-server` binary and ensure it stays online during system reboots or crashes.
 </Callout>
-
-Facts:
-
-* JavaScript runs via **V8**, embedded securely in the Rust Engine
-* **HTTP, async I/O, threading, and scheduling are fully Rust-owned**
-* Actions execute synchronously across a multi-threaded isolate pool
-
-V8 is used **only for business logic**.
-Rust owns the performance-critical hot path.
-
-Result:
-
-* Predictable latency
-* Stable throughput
-* No dev vs prod behavior gap
-
----
-
-## ☁️ Deploy on Railway / Render (GitHub → Production)
-
-<Callout type="info">
-  For Railway and Render, you do <strong>not</strong> deploy the binary manually.  
-  Just push your Titan project to GitHub and connect the repository.
-  Don't forget to add the `.gitignore` file (refer to [Environment Variables](/docs/how-to-use/06-env) for details).
-</Callout>
-
-Titan projects ship with a **fully production-ready Dockerfile**.  
-Railway and Render automatically detect it and handle the entire build and runtime process.
-
-### How it works
-
-1. Push your full Titan project to GitHub  
-2. Connect the repository to **Railway** or **Render**
-3. Click deploy
-
-That’s it.
-
-The platform will:
-
-- Run `npm run build`
-- Start the server using `npm run start`
-
-You do **not** need to:
-
-- Hand-configure Rust
-- Write a custom build pipeline
-- Manage complex process watchers
-
-### What gets deployed
-
-- Your bundled `dist/` output
-- The pre-compiled `@titanpl/engine-<os>-<arch>` natively matched to the host container.
-
-The provided Dockerfile handles **everything** required for production.
-
-### Recommended settings
-
-- **Service type:** Docker
-- **Build source:** GitHub repository
-
-Railway and Render both work out of the box.
 
 ---
 
 **Summary**
 
-- Push project to GitHub
-- Connect repo to Railway or Render
-- Dockerfile builds and runs Titan automatically
-- Zero manual production configuration
-
----
-
-## 🧩 Reverse Proxy Setup
-
-Titan is designed to run **behind standard reverse proxies**, including:
-
-* nginx
-* Caddy
-* Cloudflare
-* Traefik
-
-Titan does **not** replace these tools.
-
----
-
-## Summary
-
-* Production relies on the pre-compiled **Titan Engine**
-* Deploy by uploading `dist/` and starting the engine
-* V8 powered business logic, Rust controls the concurrency and networking
-* No native build toolchain required on the final server
+- Use `titan build --release` for a self-contained production bundle.
+- Configure `tanfig.json` for custom assets and security permissions.
+- Deploy the `build/` folder to any Linux or Windows server.
+- No Node.js runtime required on the server (just the binary).
 

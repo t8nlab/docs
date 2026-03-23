@@ -1,0 +1,92 @@
+---
+title: 08. Security Architecture
+description: Learn how TitanPL ensures a high-performance yet secure environment for your backend operations.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Shield, Lock, Cpu, Zap } from "lucide-react";
+
+# Is TitanPL Secure?
+
+TitanPL is built with security as a core architectural pillar. By leveraging Rust's safety guarantees and the V8 sandbox, TitanPL provides a defense-in-depth model that is both fast and robust.
+
+---
+
+## 🛡️ The Security Model
+
+TitanPL uses a tiered security model to isolate untrusted code and sensitive operations.
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-8">
+  <div className="p-6 rounded-xl border bg-card/50">
+    <div className="flex items-center gap-3 mb-4 text-blue-500">
+      <Cpu className="h-6 w-6" />
+      <h3 className="font-bold underline underline-offset-4">V8 Sandboxing</h3>
+    </div>
+    <p className="text-sm text-muted-foreground">
+      JavaScript actions run inside an isolated V8 environment. Memory is managed safely, preventing buffer overflows and direct host access.
+    </p>
+  </div>
+  <div className="p-6 rounded-xl border bg-card/50">
+    <div className="flex items-center gap-3 mb-4 text-emerald-500">
+      <Lock className="h-6 w-6" />
+      <h3 className="font-bold underline underline-offset-4">Out-of-Process Native</h3>
+    </div>
+    <p className="text-sm text-muted-foreground">
+      Native extensions execute in a separate process space. A crash or exploit in an extension cannot compromise the core engine.
+    </p>
+  </div>
+</div>
+
+---
+
+## 🔐 Gravity Policy (Mandatory Authorization)
+
+The most distinctive security feature of TitanPL is the **Gravity Policy**. Unlike traditional NPM ecosystems where any package can execute native code upon installation, TitanPL forces a "Zero-Trust" approach.
+
+### Key Pillars:
+1.  **Hard-Blocked by Default**: Any native extension found in `node_modules` is ignored unless explicitly listed.
+2.  **Explicit Permissions**: You must authorize WASM and Native extensions in your `tanfig.json`.
+3.  **No Post-Install Hooks**: TitanPL does not execute arbitrary `scripts` during installation that could lead to supply-chain attacks.
+
+```json title="tanfig.json"
+{
+  "extensions": {
+    "allowWasm": false,
+    "allowNative": ["@titanpl/core"] // Only trusted extensions
+  }
+}
+```
+
+---
+
+## 🏗️ Binary Safety & Verification
+
+All official TitanPL engine binaries are **signed and verified**.
+
+- **Rust's Memory Safety**: The core engine is written in Rust, eliminating entire classes of memory safety bugs like use-after-free or null pointer dereferences.
+- **Static Linking**: The engine is distributed as a self-contained binary, reducing the attack surface by minimizing external dynamic library dependencies.
+
+---
+
+## 🛡️ Out-of-Process Architecture
+
+When you use a Native Extension (Rust/C++), TitanPL spawns it as a separate host process. Communication happens over a secure IPC (Inter-Process Communication) pipe.
+
+**Benefits:**
+- **Fault Tolerance**: If an extension crashes, the engine remains online and can restart the extension orbit.
+- **Strict Isolation**: Extensions only have access to the resources (files, network) that you explicitly grant via the engine's capability system.
+
+---
+
+<Callout type="success">
+  **The Titan Guarantee:** Your business logic is sandboxed, your extensions are isolated, and your configuration is explicit. Secure by design, fast by architecture.
+</Callout>
+
+---
+
+## Summary
+
+- **JS Sandbox**: Powered by V8.
+- **Native Isolation**: Out-of-process for maximum stability.
+- **Explicit Auth**: `tanfig.json` is the guardian of your runtime.
+- **Rust Core**: Built on a memory-safe foundation.

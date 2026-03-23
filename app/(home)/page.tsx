@@ -217,7 +217,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">TitanPL SDK</h3>
+              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">@titanpl/sdk</h3>
               <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
                 Scaffold, test, and publish extensions with a single workflow. Generate modules and ship npm packages.
               </p>

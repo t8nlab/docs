@@ -33,13 +33,14 @@ Starts the Titan development server with hot reload.
 - **Hot Reload:** Watches for file changes and restarts the orbit instantly.
 
 ### `titan build`
-Compiles your application into a single, high-performance native binary for production.
+Compiles your application for production.
+- **`--release`**: Generates a self-contained production bundle in the `build/` directory, including the engine binary and pre-computed routes.
 
 ### `titan update`
 Syncs and generates necessary native files and configurations.
-- **Migration:** Essential when enabling Rust Actions in an existing project.
-- **Core Sync:** Ensures your project's native wrapper matches your local CLI version.
-- **Automation:** Re-downloads and configures the native core based on your `package.json` settings.
+- **Migration**: Essential when enabling Rust Actions in an existing project.
+- **Core Sync**: Ensures your project's native wrapper matches your local CLI version.
+- **Automation**: Re-downloads and configures the native core based on your `package.json` settings.
 
 ---
 
@@ -47,7 +48,13 @@ Syncs and generates necessary native files and configurations.
 
 ### `titan create ext <name>`
 Scaffolds a new Titan extension in a subdirectory.
-- Creates `titan.json`, `index.js`, and a `native/` Rust directory.
+- **Options**: Select between `js`, `wasm`, or `native` types.
+- **Structure**: Creates `titan.json`, along with the necessary boilerplate files for the selected type (e.g., `index.js`, Rust source, or WASM configuration).
+
+### `titan build ext`
+Compiles WASM or Native extensions for distribution.
+- **WASM**: Compiles Rust to `.wasm` (requires Rust toolchain).
+- **Native**: Compiles Rust/C++ to platform-specific binaries (.dll/.so).
 
 ### `titan run ext`
 Runs the Extension Test Harness.

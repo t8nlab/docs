@@ -116,6 +116,9 @@ export default function Footer() {
                             <Link href="/playground" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Project Titan
                             </Link>
+                            <Link href="/security" className="text-sm font-bold text-emerald-500 transition-colors hover:text-emerald-400">
+                                Is Titan Secure?
+                            </Link>
                         </div>
 
                         <div className="flex flex-col gap-6">
@@ -134,8 +137,8 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://github.com/t8nlab/titanpl/tree/main/titanpl-sdk" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                            titanpl-sdk
+                                        <Link href="https://github.com/t8nlab/titanpl/tree/main/packages/sdk" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/sdk
                                         </Link>
                                     </li>
                                     <li>
@@ -174,8 +177,8 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://www.npmjs.com/package/titanpl-sdk" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                            titanpl-sdk
+                                        <Link href="https://www.npmjs.com/package/@titanpl/sdk" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/sdk
                                         </Link>
                                     </li>
                                     <li>

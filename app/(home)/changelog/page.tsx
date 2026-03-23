@@ -40,10 +40,10 @@ export default async function ChangelogPage() {
 
 
     const systems = [
-        { name: "Orbit System", image: "/images/orbit-system.png", href: "/docs/orbit-system" },
-        { name: "Gravity Runtime", image: "/images/gravity-runtime.png", href: "/docs/runtime-architecture" },
-        { name: "TitanPl SDK", image: "/images/titanpl-sdk.png", href: "/docs/12-sdk" },
-        { name: "Extensions", image: "/images/titanpl-ext.png", href: "/docs/10-extensions" },
+        { name: "Orbit System", image: "/images/orbit-system.png", href: "/docs/knowledge/03-orbit-system" },
+        { name: "Gravity Runtime", image: "/images/gravity-runtime.png", href: "/docs/knowledge/02-runtime-architecture" },
+        { name: "@titanpl/sdk", image: "/images/titanpl-sdk.png", href: "/docs/how-to-use/12-package-ecosystem" },
+        { name: "Extensions", image: "/images/titanpl-ext.png", href: "/docs/knowledge/07-extensions" },
     ];
 
     return (
@@ -70,7 +70,7 @@ export default async function ChangelogPage() {
                                     Synced from GitHub
                                 </span>
                             </Link>
-                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70">
                                 Changelog
                             </h1>
                             <p className="text-lg text-muted-foreground max-w-2xl">

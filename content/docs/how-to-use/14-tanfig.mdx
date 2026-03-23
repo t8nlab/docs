@@ -1,0 +1,83 @@
+---
+title: 14. Configuration (tanfig.json)
+description: Explore all possible configurations for your TitanPL application in the tanfig.json file.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+The `tanfig.json` file is the central point of configuration for your TitanPL project. It controls how your application is built, how extensions are loaded, and how the engine behaves in different environments.
+
+---
+
+## 🏗️ Top-Level Configuration
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The unique name of your application. |
+| `version` | `string` | (Optional) The version of your application. |
+
+---
+
+## 📦 Build Configuration (`build`)
+
+The `build` block controls the behavior of the `titan build --release` command.
+
+```json
+{
+  "build": {
+    "files": ["public", "static", "db", "certs", "custom-assets"],
+    "env": "production"
+  }
+}
+```
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `files` | `string[]` | An array of files or folders from your project root that should be copied into the `build/` directory. By default, TitanPL copies `public`, `static`, `db`, and `tanfig.json`. |
+| `env` | `string` | Sets the build environment. Supported values are `production` and `deploy`. Setting this to `production` ensures a clean, standalone build without local symlinks. |
+
+---
+
+## 🧩 Extension Configuration (`extensions`)
+
+The `extensions` block handles security and permissions for different types of TitanPL extensions.
+
+```json
+{
+  "extensions": {
+    "allowWasm": true,
+    "allowNative": [
+      "@titanpl/core",
+      "my-custom-native-ext"
+    ]
+  }
+}
+```
+
+| Field | Type | Description | Default |
+| :--- | :--- | :--- | :--- |
+| `allowWasm` | `boolean` | If true, the engine will allow loading and executing WebAssembly (.wasm) extensions. | `false` |
+| `allowNative` | `string[]` | A list of explicit extension names (found in `node_modules` or `.ext/`) that are permitted to run in native mode. | `[]` |
+
+<Callout type="error">
+  **Security Rule:** To prevent unvetted code execution, any extension that is not a JS-only extension **must** be explicitly allowed here. If a native extension is found but not listed, the engine will refuse to start.
+</Callout>
+
+---
+
+## 🚀 Engine Configuration (`engine`)
+
+(Advanced) Configure how the TitanPL engine interacts with your host environment.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `entry` | `string` | (Optional) The entry point for your application logic. Defaults to `app/`. |
+| `port` | `number` | (Optional) The default port for the titan server. This can be overridden by environment variables. |
+
+---
+
+## 🛡️ Best Practices
+
+- **Minimalist Permissions:** Only add extensions to `allowNative` that you have vetted and trust.
+- **Explicit Builds:** Always use `env: "production"` in your `build` block when preparing a deployment bundle.
+- **Custom Assets:** Keep your `files` array updated if your application relies on specific folders (like `certs/` or `custom-assets/`) remaining available in the final bundle.

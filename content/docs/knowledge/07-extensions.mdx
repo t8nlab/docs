@@ -1,95 +1,99 @@
 ---
-title: 7. Native Extensions
-description: Elevate Titan Planet with custom JavaScript and high-performance Native Rust logic.
+title: 07. Extension System
+description: Extend TitanPL with JavaScript, WebAssembly, or Native Rust/C++ modules for limitless performance and capability.
 ---
 
-Titan Planet allows you to add modular features to any project through Extensions. These extensions can be written in pure JavaScript or a hybrid of JavaScript and Native Rust.
+import { Callout } from "fumadocs-ui/components/callout";
 
-## Project Structure
-
-A typical Titan extension has the following structure:
-
-- `index.js`: The JavaScript entry point where you define your extension's API on the global `t` object.
-- `titan.json`: Manifest file defining extension metadata and Native module mappings.
-- `native/`: Directory for Rust source code.
-  - `src/lib.rs`: Your Native function implementations.
-  - `Cargo.toml`: Rust package and dependency configuration.
-- `jsconfig.json`: Enables full IntelliSense for the Titan Runtime API.
+TitanPL supports three distinct types of extensions to suit different performance and security needs. All extensions are registered on the global `t` object for seamless use in your JavaScript actions.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Extension Types
 
-### 1. Create a new Extension
-Use the Titan CLI to scaffold a new extension:
-```bash
-titan create ext <name>
-```
+### 1. JavaScript (JS-Only)
+- **Best for**: Standard utilities, helper functions, and non-blocking logic.
+- **Complexity**: Zero build step.
+- **Security**: Always safe, runs inside the V8 sandbox.
+- **How to Create**:
+  ```bash
+  titan create ext <name>
+  # Select 'js'
+  ```
+- **Structure**:
+  - `index.js`: Main logic.
+  - `titan.json`: Metadata.
+- **Registration**: Uses `utils/registerExtension.js` to safely attach to the global `t`.
 
-### 2. Install Dependencies
-Get full type support in your IDE:
-```bash
-npm install
-```
+### 2. WebAssembly (WASM)
+- **Best for**: Performance-critical algorithms, parsers, or portable Rust logic.
+- **Complexity**: Requires `titan build ext` (compiles Rust to `.wasm`).
+- **Security**: Sandboxed, requires `allowWasm: true` in `tanfig.json`.
+- **How to Create**:
+  ```bash
+  titan create ext <name>
+  # Select 'wasm'
+  ```
+- **Build**: `titan build ext` (requires Rust toolchain).
 
-### 3. Build Native Module (Optional)
-If your extension uses Rust, compile it to a dynamic library:
-```bash
-cd native
-cargo build --release
-cd ..
-```
-
-### 4. Test the Extension
-Use the Titan SDK to run a local test harness:
-```bash
-titan run ext
-```
-*Tip: Visit `http://localhost:3000/test` after starting the runner to see your extension in action!*
+### 3. Native (Rust/C++)
+- **Best for**: Direct OS access, high-performance database drivers, or hardware acceleration.
+- **Complexity**: Out-of-process execution for stability. Requires `titan build ext`.
+- **Security**: Hard-Blocked by default. Requires explicit listing in `tanfig.json`.
+- **How to Create**:
+  ```bash
+  titan create ext <name>
+  # Select 'native'
+  ```
+- **Build**: `titan build ext` (compiles to `.dll` or `.so`).
 
 ---
 
-## 💻 Development Guide
+## 🛡️ Security Configuration (`tanfig.json`)
 
-### Writing JavaScript
-Extensions interact with the global `t` object. It's best practice to namespace your extension:
-
-```javascript
-t.myExtension = {
-    myMethod: (val) => {
-        t.log("myExtension", "Doing something...");
-        return val * 2;
-    }
-};
-```
-
-### Writing Native Rust Functions
-Native functions should be marked with `#[no_mangle]` and use `extern "C"`:
-
-```rust
-#[no_mangle]
-pub extern "C" fn multiply(a: f64, b: f64) -> f64 {
-    a * b
-}
-```
-
-### Mapping Native Functions in `titan.json`
-Expose your Rust functions to JavaScript by adding them to the `native.functions` section:
+To prevent unvetted code from running, TitanPL requires explicit permissions for non-JS extensions.
 
 ```json
-"functions": {
-    "add": {
-        "symbol": "add",
-        "parameters": ["f64", "f64"],
-        "result": "f64"
-    }
+{
+  "name": "my-secure-app",
+  "extensions": {
+    "allowWasm": true,
+    "allowNative": [
+      "@titanpl/core",
+      "my-custom-native-ext"
+    ]
+  }
+}
+```
+
+<Callout type="error">
+  **Gravity Policy:** The engine will trigger a **HARD ERROR** and refuse to start if any native extension is detected in `node_modules` or `.ext` that is not explicitly allowed.
+</Callout>
+
+---
+
+## 🛠️ Usage in Actions
+
+Once an extension is loaded, it is available globally on the `t` object. You can also import specific components for better IDE support.
+
+```javascript
+// app/actions/my-action.js
+import { log, crypto } from "@titanpl/native"; // Typed access
+
+export function myAction(req) {
+    // Both syntaxes work:
+    t.log("Extension is ready!");
+    log("Direct access also works!");
+    
+    return { status: "success" };
 }
 ```
 
 ---
 
-## 📦 Deployment
-To use your extension in a Titan project:
-1. Publish your extension to npm or link it locally.
-2. In your Titan project: `npm install my-extension`.
-3. Gravity will automatically detect and load your extension if it contains a `titan.json`.
+**Summary**
+
+- Choose the right extension type (JS, WASM, or Native) based on your needs.
+- Use `titan create ext` to scaffold new extensions.
+- Explicitly authorize WASM and Native extensions in `tanfig.json`.
+- Access extensions via the global `t` object or specific imports.
