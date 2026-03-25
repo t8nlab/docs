@@ -26,7 +26,6 @@ The `build` block controls the behavior of the `titan build --release` command.
 {
   "build": {
     "files": ["public", "static", "db", "certs", "custom-assets"],
-    "env": "production"
   }
 }
 ```
@@ -34,7 +33,6 @@ The `build` block controls the behavior of the `titan build --release` command.
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `files` | `string[]` | An array of files or folders from your project root that should be copied into the `build/` directory. By default, TitanPL copies `public`, `static`, `db`, and `tanfig.json`. |
-| `env` | `string` | Sets the build environment. Supported values are `production` and `deploy`. Setting this to `production` ensures a clean, standalone build without local symlinks. |
 
 ---
 
