@@ -116,7 +116,7 @@ export default function Footer() {
                             <Link href="/playground" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Project Titan
                             </Link>
-                            <Link href="/security" className="text-sm font-bold text-emerald-500 transition-colors hover:text-emerald-400">
+                            <Link href="/security" className="text-sm font-bold text-zinc-500 dark:text-zinc-400 transition-colors hover:text-emerald-400">
                                 Is Titan Secure?
                             </Link>
                         </div>

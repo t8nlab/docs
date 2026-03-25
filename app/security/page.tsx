@@ -1,9 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Shield, Lock, Cpu, Zap, Activity, AlertTriangle, CheckCircle2, Server, Globe, Package } from "lucide-react"
+import { Shield, Lock, Cpu, CheckCircle2, Server } from "lucide-react"
 import Link from "next/link"
-import { Feature } from "@/app/components/Feature"
 
 export default function SecurityPage() {
     return (
