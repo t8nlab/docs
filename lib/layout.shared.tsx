@@ -3,6 +3,7 @@ import Image from "next/image"
 import { GithubStars } from '@/app/components/github-stars';
 
 import { RiDiscordFill } from "@remixicon/react";
+import UserMenu from '@/app/components/UserMenu';
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -41,16 +42,6 @@ export function baseOptions(): BaseLayoutProps {
       {
         text: <GithubStars />,
         url: "https://github.com/ezet-galaxy/titanpl",
-        active: "nested-url"
-      },
-      {
-        text: (
-          <div className="group flex gap-2 items-center justify-center bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40 rounded-lg px-3 py-1 transition-all duration-300 w-full">
-            <RiDiscordFill className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium text-indigo-500 dark:text-indigo-400">Join Discord</span>
-          </div>
-        ),
-        url: "https://discord.gg/cYpB9bSY",
         active: "nested-url"
       },
     ]

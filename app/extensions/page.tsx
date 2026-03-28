@@ -7,7 +7,7 @@ import {
     Search, Boxes, ShieldCheck,
     PlusCircle, Package, Loader2,
     Globe, ArrowRight, Rocket,
-    Download,
+    Download, LayoutDashboard
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { showToast } from "@/lib/toast";
@@ -195,6 +195,15 @@ export default function ExtensionsMarket() {
                             <PlusCircle size={20} />
                             Publish Extension
                         </button>
+                        {user?.isAdmin && (
+                            <Link
+                                href="/admin"
+                                className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 font-black rounded-2xl px-8 py-4 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-95"
+                            >
+                                <LayoutDashboard size={20} />
+                                Go to Dashboard
+                            </Link>
+                        )}
                     </div>
                 </div>
 

@@ -8,7 +8,7 @@ export function ConditionalFooter() {
 
     // Hide footer exactly on the observatory tool page
     // but show it everywhere else (including /observatory/download)
-    if (pathname === '/observatory') {
+    if (pathname === '/observatory' || pathname.startsWith('/admin')) {
         return null;
     }
 

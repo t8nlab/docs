@@ -7,6 +7,14 @@ description: Detailed reference for Titan's built-in runtime APIs, providing hig
 
 Titan Planet provides a comprehensive set of **runtime APIs** exposed via the global `t` object or through the `@titanpl/native` utility package. These APIs execute directly in the high-performance Rust core, offering near-native speed for system-level operations.
 
+### Environment Variables (`t.env`)
+Titan provides access to your environment variables (defined in your project's `.env` files) via `t.env`. This is available both globally and within your actions.
+
+```javascript
+const dbUri = t.env.DB_URI; // Maps to DB_URI in .env
+```
+
+
 ### Installation & Import
 
 While `t` is always available globally, you can also import specific utilities for better type support and clarity:
@@ -15,10 +23,22 @@ While `t` is always available globally, you can also import specific utilities f
 import { fs, ws, crypto, os, response } from "@titanpl/native";
 
 export const myAction = (req) => {
-  const content = fs.readFile("config.json"); // Uses project root as base
+  const content = fs.readFile("tanfig.json"); // Uses project root as base
   return response.json({ content });
 };
 ```
+
+---
+
+### The Request Object (`req`)
+Every Titan action receives a `Request` object containing details about the incoming event.
+
+- `method: string` — HTTP method (e.g., `GET`, `POST`).
+- `path: string` — The request path.
+- `headers: Record<string, string>` — Key-value pairs of request headers.
+- `params: Record<string, any>` — Path parameters (e.g., from `/users/:id`).
+- `query: Record<string, any>` — URL query parameters.
+- `body: any` — The parsed request body.
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
@@ -30,16 +50,30 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 ## API Reference
 
-### `fs` (File System)
-Synchronous file system operations.
+### Core Functions
+These global functions are available for general logging, action definition, and asynchronous orchestration.
 
-- `fs.readFile(path: string): string` — Read file content as UTF-8 string.
-- `fs.writeFile(path: string, content: string): void` — Write string content to file.
-- `fs.exists(path: string): boolean` — Check if a path exists.
-- `fs.mkdir(path: string): void` — Create a directory (recursive).
-- `fs.remove(path: string): void` — Remove file or directory.
-- `fs.readdir(path: string): string[]` — List directory contents.
-- `fs.stat(path: string): object` — Get file statistics `{ isFile: boolean, isDir: boolean, size: number, modified: number }`.
+- `log(message: any): void` — Log information to the Titan system console.
+- `fetch(url: string, options?: object): Promise<any>` — Native, high-performance HTTP client.
+- `defineAction(handler: Function): Function` — Utility for defining Titan actions with built-in type safety.
+- `drift(operation: Promise<any>): any` — Wraps asynchronous operations to ensure they are handled correctly by Titan's execution engine.
+
+### `fs` (File System)
+Asynchronous file system operations. All methods return a `Promise` and must be used with `drift()`.
+
+- `fs.readFile(path: string): Promise<string>` — Read file content as UTF-8 string.
+- `fs.readFileBase64(path: string): Promise<string>` — Read file content as a Base64 string.
+- `fs.readFileBinary(path: string): Promise<Uint8Array>` — Read file content as raw binary bytes.
+- `fs.writeFile(path: string, content: string): Promise<void>` — Write string content to file.
+- `fs.writeFileBinary(path: string, bytes: Uint8Array): Promise<void>` — Write binary content to file.
+- `fs.exists(path: string): Promise<boolean>` — Check if a path exists.
+- `fs.mkdir(path: string): Promise<void>` — Create a directory (recursive).
+- `fs.remove(path: string): Promise<void>` — Remove file or directory.
+- `fs.readdir(path: string): Promise<string[]>` — List directory contents.
+- `fs.stat(path: string): Promise<object>` — Get metadata: `{ size, isFile, isDir, modified }`.
+- `fs.isDirectory(path: string): Promise<boolean>` — Check if path is a directory.
+- `fs.isFile(path: string): Promise<boolean>` — Check if path is a regular file.
+
 
 ### `path` (Path Manipulation)
 Utilities for handling file paths.
@@ -61,11 +95,32 @@ Secure cryptographic utilities.
 - `crypto.hashKeyed(algo: string, key: string, message: string): string` — Keyed-hash (HMAC) support.
 - `crypto.compare(hash: string, target: string): boolean` — Securely compare two strings in constant time.
 
+### `jwt` (JSON Web Tokens)
+Native utilities for signing and verifying tokens. These methods are **synchronous**.
+
+- `jwt.sign(payload: object, secret: string, options?: { expiresIn?: string | number }): string` — Sign a JWT.
+- `jwt.verify(token: string, secret: string): any` — Verify and decode a JWT. Throws on failure.
+
+### `password` (Password Hashing)
+Secure password management powered by bcrypt (Rust implementation).
+
+- `password.hash(password: string): Promise<string>` — Hash a plain-text password.
+- `password.verify(password: string, hash: string): Promise<boolean>` — Verify a password against a hash.
+
+
+
 ### `buffer` (Buffer Utilities)
 Utilities for binary and data encoding.
 
 - `buffer.fromBase64(str: string): Uint8Array` — Decode Base64 string to bytes.
 - `buffer.toBase64(bytes: Uint8Array | string): string` — Encode bytes or string to Base64.
+
+### Serialization (V8 Native)
+Binary-serializes or deserializes JavaScript values (including Map, Set, Date, and TypedArrays) using V8's fast internal format.
+
+- `serialize(value: any): Uint8Array` — Binary-serializes a value. (Alias: `serialise`)
+- `deserialize(buffer: Uint8Array): any` — Deserializes a Uint8Array back into its original JS value. (Alias: `deserialise`)
+
 
 ### `os` (Operating System)
 Retrieve system-level information.
@@ -82,24 +137,57 @@ Basic network utilities.
 - `net.resolveDNS(hostname: string): string[]` — Resolve a hostname to IP addresses.
 - `net.ip(): string` — Get the local system IP address.
 
+### `db` (Database)
+Native interface for SQL databases (only PostgreSQL yet). Async methods require `drift()`.
+
+- `db.connect(url: string): Promise<DbConnection>` — Establish a connection.
+- `db.query(sql: string, params?: any[]): Promise<any[]>` — Run a query on the default connection.
+
+#### `DbConnection` interface:
+- `query(sql: string, params?: any[]): Promise<any[]>` — Positional placeholders (`$1`, `$2`) prevent SQL injection.
+
+
+
 ### `ws` (WebSockets)
 Real-time messaging utilities for TitanPl WebSocket actions.
 
 - `ws.send(socketId: string, message: string): void` — Send a message to a specific WebSocket connection.
 - `ws.broadcast(message: string): void` — Broadcast a message to all connected clients.
 
+**Example:**
+```javascript
+import { ws } from "@titanpl/native";
+
+export default function chat(req) {
+  if (req.event === "open") {
+    ws.send(req.socketId, "Welcome!");
+    ws.broadcast("Someone joined.");
+  }
+}
+```
+
+
 ### `proc` (Process Management)
 Manage and query system processes.
 
-- `proc.pid(): number` — Get the Process ID of the current Titan runtime.
+- `proc.pid(): number` — Get the Process ID of the current TitanPl engine.
 - `proc.info(): object` — Get basic info about the current process.
 - `proc.run(command: string, args?: string[], cwd?: string): object` — Spawn a background process.
 - `proc.kill(pid: number): boolean` — Terminate a process by PID.
 - `proc.list(): object[]` — List all running system processes with CPU and memory usage.
+- `proc.memory(): object` — Get the detailed memory usage of the process (rss, heapTotal, heapUsed, etc.).
+
+**Example for `proc.memory`:**
+```javascript
+const mem = t.proc.memory();
+t.log(`RSS: ${(mem.rss / 1024 / 1024).toFixed(2)} MB`);
+```
 
 ### `time` (Time Utilities)
-- `time.sleep(ms: number): void` — Synchronously block execution for `ms` milliseconds.
-- `time.now(): number` — Returns `Date.now()`.
+- `time.sleep(ms: number): Promise<void>` — Pause execution. Requires `drift()`.
+- `time.now(): number` — Returns a high-resolution millisecond timestamp.
+- `time.timestamp(): string` — Returns the current time as an ISO 8601 string (e.g., `"2026-01-15T12:30:45.123Z"`).
+
 
 ### `ls` (Persistent Local Storage)
 High-performance key-value storage persisted to disk.
@@ -111,8 +199,9 @@ High-performance key-value storage persisted to disk.
 - `ls.keys(): string[]` — List all stored keys.
 - `ls.setObject(key: string, value: any): void` — Store a complex JS object using native V8 serialization.
 - `ls.getObject(key: string): any` — Retrieve and restore a complex JS object.
-- `ls.serialize(value: any): Uint8Array` — Native V8 serialization (supports Map, Set, Date, Uint8Array).
-- `ls.deserialize(bytes: Uint8Array): any` — Native V8 deserialization.
+- `ls.serialize(value: any): Uint8Array` — Native V8 serialization. (Prefer using the global `serialize` instead).
+- `ls.deserialize(bytes: Uint8Array): any` — Native V8 deserialization. (Prefer using the global `deserialize` instead).
+
 
 ### `session` (Session Management)
 - `session.get(sid: string, key: string): string|null` — Get session data.
@@ -124,9 +213,31 @@ High-performance key-value storage persisted to disk.
 - `cookies.get(req: object, name: string): string|null` — Extract cookie value from request.
 - `cookies.set(res: object, name: string, value: string, options?: object): void` — Attach `Set-Cookie` to response.
 
-### `url` (URL Parsing)
-- `url.parse(str: string): URL` — Parse a URL string into a native URL object.
+### `shareContext` (Global Context)
+An interface for sharing state between different threads and broadcasting events.
+
+- `shareContext.get(key: string): any` — Retrieve stored context.
+- `shareContext.set(key: string, value: any): void` — Set context value.
+- `shareContext.delete(key: string): void` — Delete a context key.
+- `shareContext.keys(): string[]` — List all stored keys.
+- `shareContext.broadcast(event: string, payload: any): void` — Broadcast an event.
+
+
+### `url` (URL Utilities)
+- `url.parse(str: string): any` — Parse a URL string into its component parts.
+- `url.format(urlObj: object): string` — Format a URL object back into a URL string.
 - `new url.SearchParams(init?: string)` — Construct query parameters.
+
+**Example for `url.format`:**
+```javascript
+const url = t.url.format({
+    protocol: "https:",
+    hostname: "api.example.com",
+    pathname: "/users",
+    search: "?active=true"
+});
+// → "https://api.example.com/users?active=true"
+```
 
 ### `response` (HTTP Response Builder)
 Helper for constructing standardized Titan responses.
@@ -135,11 +246,12 @@ Helper for constructing standardized Titan responses.
 - `response.json(data: any, options?: object): object` — Create a JSON response.
 - `response.html(content: string, options?: object): object` — Create an HTML response.
 - `response.redirect(url: string, status?: number): object` — Create a redirect response.
+- `response.binary(bytes: Uint8Array, options?: object): object` — Send a binary response using raw bytes (e.g., images, ZIPs, PDFs).
+- `response.empty(status?: number): object` — Create an empty response (default: 204 No Content).
 
 ---
 
-### Platform Availability
+### 📦 Node.js Compatibility
+Titan Planet provides a comprehensive compatibility layer that maps standard Node.js core APIs (like `fs`, `path`, and `crypto`) directly to our high-performance Rust core.
 
-<Callout type="warn">
-  Currently, Titan Planet and its entire package ecosystem are fully supported on **Windows**. Support for **Linux** is currently in development (dev only) and will be launched officially soon.
-</Callout>
+👉 **[Explore Node.js Compatibility & @titanpl/node](../knowledge/06-node-compatibility)** — Stop fighting with shims and start building with the tools you already know.

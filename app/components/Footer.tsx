@@ -5,9 +5,18 @@ import { Activity, ArrowRight } from "lucide-react";
 import { RiGithubFill, RiNpmjsFill, RiTwitterXLine, RiDiscordFill } from "@remixicon/react";
 import Image from "next/image";
 import { useStatus } from "@/context/StatusContext";
+import { useAuth } from "@/context/AuthContext";
+import AuthModal from "./AuthModal";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { showToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
 
 export default function Footer() {
     const { status } = useStatus();
+    const { user, logout } = useAuth();
+    const router = useRouter();
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
 
     const getStatusInfo = () => {
         switch (status) {
@@ -223,10 +232,57 @@ export default function Footer() {
                             <Link href="https://petalite-stew-867.notion.site/Ezet-privacy-vault-2742b05812ae802da69ef20c3ef491d8" target="_blank" className="text-xs text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Privacy Policy
                             </Link>
+
+                            {/* Seamless Auth Portal */}
+                            <div className="flex items-center gap-4">
+                                {user && (
+                                    <button 
+                                        onClick={() => {
+                                            logout();
+                                            showToast.success('Session Ended', 'Logged out successfully.');
+                                        }}
+                                        className="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-red-500 transition-colors"
+                                    >
+                                        Exit
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => {
+                                        if (!user) setIsAuthOpen(true);
+                                        else if (user.isAdmin) router.push('/admin');
+                                        else {
+                                            // For regular users, maybe just show a simple toast or do nothing
+                                            showToast.success('Titan Link Active', `Logged in as ${user.username}`);
+                                        }
+                                    }}
+                                    className="group relative flex items-center justify-center"
+                                    aria-label="Titan Portal"
+                                >
+                                    <div className="p-2 transition-all duration-500 group-hover:rotate-180">
+                                        <div className="flex gap-[2px]">
+                                            <span className={cn("w-1 h-1 rounded-full transition-colors", user ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-800 group-hover:bg-blue-500")} />
+                                            <span className={cn("w-1 h-1 rounded-full transition-colors", user ? "bg-emerald-400" : "bg-zinc-200 dark:bg-zinc-800 group-hover:bg-blue-400")} />
+                                            <span className={cn("w-1 h-1 rounded-full transition-colors", user ? "bg-emerald-300" : "bg-zinc-200 dark:bg-zinc-800 group-hover:bg-blue-300")} />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-full mb-3 px-3 py-1.5 rounded-xl bg-black/90 dark:bg-zinc-900 border border-white/5 text-[10px] font-black text-white opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all pointer-events-none whitespace-nowrap shadow-2xl">
+                                        {user ? (user.isAdmin ? 'DASHBOARD' : user.username.toUpperCase()) : 'CONNECT TO TITAN'}
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black/90 dark:border-t-zinc-900" />
+                                    </div>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <AuthModal 
+                isOpen={isAuthOpen} 
+                onClose={() => setIsAuthOpen(false)} 
+                onSuccess={(u) => {
+                    setIsAuthOpen(false);
+                    if (u.isAdmin) router.push('/admin');
+                }} 
+            />
         </footer>
     );
 }

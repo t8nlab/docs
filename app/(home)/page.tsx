@@ -1,10 +1,9 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Terminal, Zap, Cpu, Rocket, Binary, MessageSquareQuote, Monitor } from "lucide-react"
+import { Terminal, Zap, Cpu, Rocket, MessageSquareQuote, Telescope, Puzzle, Globe as Orbit, LayoutDashboard } from "lucide-react"
 import { RiDiscordFill } from "@remixicon/react"
 import VideoLoader from "@/app/components/VideoLoader"
 import StatusBadge from "@/app/components/StatusBadge"
@@ -13,10 +12,23 @@ import { RiJavascriptFill } from "@remixicon/react"
 import { Feature } from "@/app/components/Feature"
 import { FeedbackCard } from "@/app/components/FeedbackCard"
 import { feedbacks } from "@/app/data/feedbacks"
+import { BsTypescript } from "react-icons/bs";
+import { useAuth } from "@/context/AuthContext"
+import { useRouter } from "next/navigation"
+import AuthModal from "@/app/components/AuthModal"
+import { FaRust } from "react-icons/fa";
+import { SiV8 } from "react-icons/si";
+
+
+
 
 
 export default function HomePage() {
+  const { user, loading: userLoading } = useAuth()
+  const router = useRouter()
+  const [isAuthOpen, setIsAuthOpen] = useState(false)
   const videoContainerRef = useRef<HTMLDivElement>(null)
+
 
   const { scrollYProgress } = useScroll({
     target: videoContainerRef,
@@ -124,7 +136,25 @@ export default function HomePage() {
               <RiDiscordFill className="h-4 w-4" />
               Join Discord
             </Link>
+
+            {user?.isAdmin && (
+              <Link
+                  href="/admin"
+                  className="group inline-flex h-10 items-center justify-center gap-2 rounded-md bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 px-8 text-sm font-bold transition-all hover:scale-105 active:scale-95"
+              >
+                  <LayoutDashboard size={16} />
+                  Admin Dashboard
+              </Link>
+            )}
           </motion.div>
+          <AuthModal 
+            isOpen={isAuthOpen} 
+            onClose={() => setIsAuthOpen(false)} 
+            onSuccess={(u) => {
+              setIsAuthOpen(false);
+              if (u.isAdmin) router.push('/admin');
+            }} 
+          />
         </div>
 
 
@@ -161,13 +191,8 @@ export default function HomePage() {
             {/* Observatory Card */}
             <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
-                  <Image
-                    src="/observatory_preview_active.png"
-                    alt="Observatory"
-                    fill
-                    className="object-cover"
-                  />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <Telescope className="h-6 w-6" />
                 </div>
               </div>
 
@@ -190,56 +215,49 @@ export default function HomePage() {
                 href="/observatory/download"
                 className="inline-flex items-center text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
               >
-                Learn more →
+                Download now →
               </Link>
             </div>
 
-            {/* SDK Card */}
+            {/* Runtime APIs Card */}
             <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
-                  <Image
-                    src="/images/titanpl-sdk.png"
-                    alt="SDK"
-                    fill
-                    className="object-cover"
-                  />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <Rocket className="h-6 w-6" />
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 <div className="inline-flex items-center rounded-full border bg-emerald-500/10 border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                  Core Toolkit
+                  Gravity Runtime
                 </div>
                 <StatusBadge status="STABLE" />
                 <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
                   <RiJavascriptFill className="h-3 w-3" /> JS
                 </div>
+                <div className="inline-flex items-center gap-1 rounded-full border bg-blue-400/10 border-blue-400/20 px-2.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-500">
+                  <BsTypescript size={9} /> TS
+                </div>
               </div>
 
-              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">@titanpl/sdk</h3>
+              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">25+ Native Runtime APIs</h3>
               <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
-                Scaffold, test, and publish extensions with a single workflow. Generate modules and ship npm packages.
+                Ready for production and growing every day. We don't build for hype; we build the tools that solve real developer pain points.
               </p>
 
               <Link
-                href="/docs/how-to-use/12-package-ecosystem"
+                href="/docs/how-to-use/05-runtime-apis"
                 className="inline-flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
               >
-                Learn more →
+                Explore APIs →
               </Link>
             </div>
 
             {/* Extensions Card */}
             <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
-                  <Image
-                    src="/images/titanpl-ext.png"
-                    alt="Extensions"
-                    fill
-                    className="object-cover"
-                  />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                  <Puzzle className="h-6 w-6" />
                 </div>
               </div>
 
@@ -251,8 +269,8 @@ export default function HomePage() {
                 <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
                   <RiJavascriptFill className="h-3 w-3" /> JS
                 </div>
-                <div className="inline-flex items-center gap-1 rounded-full border bg-blue-500/10 border-blue-500/20 px-2.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
-                  TS
+                <div className="inline-flex items-center gap-1 rounded-full border bg-blue-400/10 border-blue-400/20 px-2.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-500">
+                  <BsTypescript size={9} /> TS
                 </div>
               </div>
 
@@ -272,13 +290,8 @@ export default function HomePage() {
             {/* Rust Actions Card */}
             <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
-                  <Image
-                    src="/images/rust-actions.png"
-                    alt="Rust Actions"
-                    fill
-                    className="object-cover"
-                  />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400">
+                  <FaRust size={20} />
                 </div>
               </div>
 
@@ -291,7 +304,7 @@ export default function HomePage() {
                   <RiJavascriptFill className="h-3 w-3" /> JS
                 </div>
                 <div className="inline-flex items-center gap-1 rounded-full border bg-orange-500/10 border-orange-500/20 px-2.5 py-0.5 text-[10px] font-medium text-orange-600 dark:text-orange-400">
-                  <Binary size={10} strokeWidth={2.5} /> Rust
+                  <FaRust size={12} /> Rust
                 </div>
               </div>
 
@@ -311,13 +324,8 @@ export default function HomePage() {
             {/* Orbit System Card */}
             <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
-                  <Image
-                    src="/images/orbit-system.png"
-                    alt="Orbit System"
-                    fill
-                    className="object-cover"
-                  />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                  <Orbit className="h-6 w-6" />
                 </div>
               </div>
 
@@ -327,7 +335,7 @@ export default function HomePage() {
                 </div>
                 <StatusBadge status="STABLE" />
                 <div className="inline-flex items-center gap-1 rounded-full border bg-orange-500/10 border-orange-500/20 px-2.5 py-0.5 text-[10px] font-medium text-orange-600 dark:text-orange-400">
-                  <Binary size={10} strokeWidth={2.5} /> Rust
+                  <FaRust size={12} /> Rust
                 </div>
               </div>
 
@@ -347,13 +355,8 @@ export default function HomePage() {
             {/* Gravity Runtime Card */}
             <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
-                  <Image
-                    src="/images/gravity-runtime.png"
-                    alt="Gravity Runtime"
-                    fill
-                    className="object-cover"
-                  />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                  <Cpu className="h-6 w-6" />
                 </div>
               </div>
 
@@ -363,7 +366,7 @@ export default function HomePage() {
                 </div>
                 <StatusBadge status="STABLE" />
                 <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
-                  <RiJavascriptFill className="h-3 w-3" /> V8
+                  <SiV8 size={12} /> V8
                 </div>
               </div>
 

@@ -53,16 +53,17 @@ import path from "path";
 
 The following modules are mapped to Titan's native implementations:
 
-| Node API | Titan Core Mapping |
-| -------- | ------------------ |
-| `fs`     | `t.fs`             |
-| `path`   | `t.path`           |
-| `crypto` | `t.crypto`         |
-| `process`| `t.proc`           |
-| `os`     | `t.os`             |
-| `Buffer` | Native V8 + Shims  |
-| `util`   | Pure JS Shims      |
-| `events` | basic EventEmitter |
+| Node API | Titan Core Mapping | Current Status |
+| -------- | ------------------ | -------------- |
+| `fs`     | `t.fs`             | Full (Sync)    |
+| `path`   | `t.path`           | Full           |
+| `crypto` | `t.crypto`         | Full           |
+| `process`| `t.proc`           | Partial        |
+| `os`     | `t.os`             | Partial        |
+| `Buffer` | `t.buffer`         | Full           |
+| `util`   | Pure JS Shims      | Partial        |
+| `events` | basic EventEmitter | Stable         |
+
 
 <Callout title="Sync Only" type="warn">
   Only **synchronous** APIs are supported. Async Node APIs (callbacks/promises) are not supported because Titan uses `drift()` for async orchestration.
@@ -221,16 +222,80 @@ This ensures zero overhead at runtime while preserving the developer experience 
 
 ---
 
+## Detailed API Surface
+
+### Globals (`@titanpl/node/globals`)
+Once imported, the following globals are injected into the environment:
+
+- `process` — Full process shim with `env`, `argv`, and `pid`.
+- `Buffer` — The classic Node-style `Buffer` for binary data handling.
+- `__dirname` — Maps to the current directory (project root during execution).
+- `crypto` — WebCrypto-compatible surface exposing `getRandomValues` and `randomUUID`.
+
+### `fs` (File System)
+The `fs` module is a direct mapping to `t.fs` methods, targeting synchronous Node.js aliases.
+
+- `readFileSync(path, encoding?)` — Reads file contents.
+- `writeFileSync(path, data)` — Writes data to a file.
+- `existsSync(path)` — Checks if a path exists.
+- `readdirSync(path)` — Lists directory entries.
+- `mkdirSync(path)` — Creates directories.
+- `statSync(path)` — Returns metadata object.
+- `rmSync(path)` — Deletes a file or directory.
+
+### `path`
+Full utility module for cross-platform path manipulation.
+
+- `join(...parts)`
+- `resolve(...parts)`
+- `dirname(path)`
+- `basename(path)`
+- `extname(path)`
+
+### `crypto`
+Full Node-style crypto utilities backed by Titan's Rust core.
+
+- `createHash(algo)` — Supporting `sha256`, `sha512`, `md5`.
+- `createHmac(algo, key)` — High-performance HMAC hashing.
+- `randomBytes(size)` — Generates cryptographically secure bytes.
+- `randomUUID()` — Native UUID v4 generator.
+- `createCipheriv(algo, key, iv)` — Encrypt data using native Rust crypto.
+- `createDecipheriv(algo, key, iv)` — Decrypt data.
+- `timingSafeEqual(a, b)` — Constant-time string comparison.
+
+### `buffer`
+The `Buffer` shim provides compatibility for libraries expecting the Node.js Buffer class.
+
+- `Buffer.from(input, encoding?)` — Support for UTF-8 and Base64 source.
+- `Buffer.toString(bytes, encoding?)` — Conversions to shell strings or data strings.
+
+### `util`
+Lightweight utility shims for common internal logic.
+
+- `inspect(value)` — JSON-based visualizer for debugging.
+- `inherits(ctor, superCtor)` — Proto-based inheritance.
+- `format(...args)` — String formatter for logs and outputs.
+
+---
+
 ## 🚫 What Will NOT Work
 
 Titan is **not Node.js** — it is a native Rust server running V8. The following will NOT work:
 
 * `child_process` (Titan handles processes via native extensions if needed)
-* `cluster` (Titan is multi-threaded via Rust, not JS clusters)
+* `cluster` (Titan multi-threaded via Rust, not JS clusters)
 * Native `.node` addons (Use Titan Rust Extensions instead)
 * Streams requiring real Node internals (libuv based)
 * Async Node APIs (Use `drift()` for async)
 * Libraries that depend heavily on the Node event loop
+
+### Timers & Microtasks
+Because Titan executes in a **strictly synchronous** request-response cycle (only broken by `drift`), standard async timers are purposefully blocked to prevent hangs:
+
+- `setTimeout`, `setInterval`, `setImmediate`
+- `process.nextTick`, `queueMicrotask`
+
+Calling these will throw an error with the `[Titan Node Libs Support]` explanation.
 
 ---
 

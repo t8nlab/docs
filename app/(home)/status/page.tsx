@@ -15,10 +15,17 @@ import {
     Info,
     AlertTriangle,
     AlertOctagon,
-    Construction
+    Construction,
+    Monitor
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useStatus, SystemStatus } from '@/context/StatusContext';
+import { FaApple, FaLinux } from "react-icons/fa";
+import { TbBrandWindowsFilled } from "react-icons/tb";
+
+
+
+
 
 const StatusPage = () => {
     const { status, activeVulnerabilities, resolvedVulnerabilities, refreshStatus } = useStatus();
@@ -63,9 +70,9 @@ const StatusPage = () => {
     const systemList = [
         { name: "Orbit System", icon: Layers, description: "Core routing & orchestration" },
         { name: "Gravity Runtime", icon: Cpu, description: "V8 execution engine" },
-        { name: "Titan SDK", icon: Box, description: "Development toolkit" }, // Matches DB component name
+        { name: "TitanPL Core Extension", icon: Box, description: "Native development framework" }, // Matches DB component name
         { name: "Extensions Registry", icon: Puzzle, description: "Package distribution" },
-        { name: "Documentation", icon: Globe, description: "https://titan-docs-ez.vercel.app/docs" },
+        { name: "Documentation", icon: Globe, description: "Official TitanPL technical reference" },
         { name: "Auth Services", icon: Shield, description: "Authentication & Security" }
     ];
 
@@ -302,6 +309,47 @@ const StatusPage = () => {
                         </motion.div>
                     ))}
                 </motion.div>
+                
+                {/* Platforms Section */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="mb-12"
+                >
+                    <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                        <Monitor className="text-primary" size={20} />
+                        Native Platform Support
+                    </h3>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[
+                            { name: "Windows", icon: TbBrandWindowsFilled, status: "operational", desc: "x64 / ARM64 Stable" },
+                            { name: "Linux", icon: FaLinux, status: "operational", desc: "Ubuntu / Fedora / Arch" },
+                            { name: "macOS", icon: FaApple, status: "maintenance", desc: "In Development (Planned)" }
+                        ].map((plat, idx) => (
+                            <div key={idx} className="p-5 rounded-xl border bg-background/40 backdrop-blur-sm flex items-center gap-4 transition-all hover:bg-background/60">
+                                <div className={cn(
+                                    "p-2.5 rounded-lg",
+                                    plat.status === 'operational' ? "bg-emerald-500/10 text-emerald-500" : "bg-blue-500/10 text-blue-500"
+                                )}>
+                                    <plat.icon size={20} />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold text-sm">{plat.name}</span>
+                                        <div className={cn(
+                                            "w-1.5 h-1.5 rounded-full animate-pulse",
+                                            plat.status === 'operational' ? "bg-emerald-500" : "bg-blue-500"
+                                        )} />
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight mt-0.5">
+                                        {plat.status === 'operational' ? plat.desc : "Under Development"}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
 
                 {/* Maintenance Note (Dynamic) */}
                 <motion.div
@@ -356,6 +404,11 @@ const StatusPage = () => {
                                             <div className="flex items-center gap-2 mb-0.5">
                                                 <span className="font-semibold text-sm">{vuln.id}</span>
                                                 <span className="text-xs text-muted-foreground">({vuln.component})</span>
+                                                {vuln.devDetails && (
+                                                    <span className="text-[9px] font-mono bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded border border-blue-500/20 max-w-[200px] truncate" title={vuln.devDetails}>
+                                                        {vuln.devDetails}
+                                                    </span>
+                                                )}
                                             </div>
                                             <p className="text-xs text-muted-foreground line-clamp-1">{vuln.description}</p>
                                         </div>

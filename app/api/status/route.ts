@@ -41,11 +41,11 @@ export async function GET() {
             status: 'degraded',
             active: [
                 {
-                    id: 'TPL-SDK-TEST-001-26',
+                    id: 'TPL-EXT-TEST-001-26',
                     affectedVersions: ['26.12.8', '26.12.6'],
-                    component: 'TitanPl SDK',
+                    component: 'TitanPL Core Extension',
                     severity: 'high',
-                    description: 'SDK suggestions are working, but the testing of extensions is not working properly under high vulnerability conditions.',
+                    description: 'Core extension suggestions are working, but the testing of native extensions is not working properly under high vulnerability conditions.',
                     status: 'active',
                     workaround: null,
                     createdAt: new Date().toISOString()

@@ -27,7 +27,7 @@ This documentation covers:
 - **Extensions** — Extend Titan with native Rust
 - **Titan Core** — Built-in utilities and helpers
 - **Orbit System** — Dependency management
-- **SDK** — Client SDK for consuming Titan APIs
+- **TitanPL Core Extension** — Client SDK for consuming Titan APIs
 - **ESLint Plugin** — Linting rules for Titan code
 
 ### Deployment

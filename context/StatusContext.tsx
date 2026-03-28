@@ -12,7 +12,8 @@ export interface Vulnerability {
     description: string;
     workaround?: string;
     status: 'active' | 'resolved';
-    createdAt?: string; // Optional for now as legacy data might not have it
+    devDetails?: string;
+    createdAt?: string;
 }
 
 interface StatusContextType {
