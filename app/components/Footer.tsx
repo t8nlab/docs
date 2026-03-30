@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { Activity, ArrowRight } from "lucide-react";
+import { Activity, ArrowRight, Zap } from "lucide-react";
 import { RiGithubFill, RiNpmjsFill, RiTwitterXLine, RiDiscordFill } from "@remixicon/react";
 import Image from "next/image";
 import { useStatus } from "@/context/StatusContext";
@@ -58,7 +58,7 @@ export default function Footer() {
                             </p>
 
                             <Link
-                                href="https://discord.gg/cYpB9bSY"
+                                href="https://discord.gg/Dm9cD8QGUa"
                                 target="_blank"
                                 className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-indigo-600 px-8 py-2 text-sm font-bold text-white transition-all hover:bg-indigo-500 hover:ring-4 hover:ring-indigo-500/20 active:scale-95 shadow-lg shadow-indigo-500/20"
                             >
@@ -77,7 +77,7 @@ export default function Footer() {
                                     <RiTwitterXLine className="h-5 w-5 text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-black dark:group-hover:text-white" />
                                 </Link>
                                 <Link
-                                    href="https://discord.gg/cYpB9bSY"
+                                    href="https://discord.gg/Dm9cD8QGUa"
                                     target="_blank"
                                     className="group flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/10 dark:bg-indigo-500/10 transition-colors hover:bg-indigo-500/20 dark:hover:bg-indigo-500/20"
                                     aria-label="Discord"
@@ -109,6 +109,10 @@ export default function Footer() {
                             <Link href="/observatory/download" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Observatory
                             </Link>
+                            <Link href="/kit" className="flex gap-2 items-center text-sm text-indigo-500 dark:text-indigo-400 font-bold transition-all hover:scale-105 active:scale-95">
+                                <Zap size={14} className="animate-pulse" />
+                                TitanPL Kit
+                            </Link>
                             <Link href="/benchmark" className="flex gap-2 items-center text-sm text-zinc-500 dark:text-zinc-400 font-medium transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 <Activity size={14} />
                                 Benchmark
@@ -119,13 +123,13 @@ export default function Footer() {
                             <Link href="/docs/knowledge/02-runtime-architecture" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Gravity Runtime
                             </Link>
-                            <Link href="/extensions" className="text-sm text-zinc-500 dark:text-zinc-400 font-bold transition-colors hover:text-blue-500 dark:hover:text-blue-400">
+                            <Link href="/extensions" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-blue-500 dark:hover:text-blue-400">
                                 Extension Market
                             </Link>
                             <Link href="/playground" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Project Titan
                             </Link>
-                            <Link href="/security" className="text-sm font-bold text-zinc-500 dark:text-zinc-400 transition-colors hover:text-emerald-400">
+                            <Link href="/security" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-green-600">
                                 Is Titan Secure?
                             </Link>
                         </div>
@@ -146,18 +150,18 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://github.com/t8nlab/titanpl/tree/main/packages/sdk" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                            @titanpl/sdk
+                                        <Link href="https://github.com/t8nlab/kit" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/kit
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://github.com/shoya-129/-titanpl-valid" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                            -titanpl-valid
+                                        <Link href="https://github.com/shoya-129/core" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/core
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://github.com/shoya-129/-titanpl-valid" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                            -titanpl-core
+                                        <Link href="https://github.com/shoya-129/valid" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/valid
                                         </Link>
                                     </li>
                                     <li>
@@ -166,8 +170,8 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://github.com/t8nlab/titanpl/tree/main/templates/extension" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                            titanpl-ext-template
+                                        <Link href="https://github.com/t8nlab/extTemplate" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/extension-template
                                         </Link>
                                     </li>
                                 </ul>
@@ -181,13 +185,13 @@ export default function Footer() {
                                 </div>
                                 <ul className="space-y-2 pl-3 border-l border-black/10 dark:border-white/10 border-dashed">
                                     <li>
-                                        <Link href="https://www.npmjs.com/package/@ezetgalaxy/titan" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                            @ezetgalaxy/titan
+                                        <Link href="https://www.npmjs.com/package/@titanpl/cli" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/cli
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://www.npmjs.com/package/@titanpl/sdk" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                            @titanpl/sdk
+                                        <Link href="https://www.npmjs.com/package/@titanpl/kit" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/kit
                                         </Link>
                                     </li>
                                     <li>
@@ -206,8 +210,18 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://www.npmjs.com/package/@tgrv/microgravity" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                            @tgrv/microgravity
+                                        <Link href="https://www.npmjs.com/package/@titanpl/route" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/route
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="https://www.npmjs.com/package/@titanpl/native" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/native
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="https://www.npmjs.com/package/@titanpl/packet" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @titanpl/packet
                                         </Link>
                                     </li>
                                 </ul>
@@ -236,7 +250,7 @@ export default function Footer() {
                             {/* Seamless Auth Portal */}
                             <div className="flex items-center gap-4">
                                 {user && (
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             logout();
                                             showToast.success('Session Ended', 'Logged out successfully.');
@@ -275,13 +289,13 @@ export default function Footer() {
                     </div>
                 </div>
             </div>
-            <AuthModal 
-                isOpen={isAuthOpen} 
-                onClose={() => setIsAuthOpen(false)} 
+            <AuthModal
+                isOpen={isAuthOpen}
+                onClose={() => setIsAuthOpen(false)}
                 onSuccess={(u) => {
                     setIsAuthOpen(false);
                     if (u.isAdmin) router.push('/admin');
-                }} 
+                }}
             />
         </footer>
     );

@@ -13,15 +13,12 @@ import { Feature } from "@/app/components/Feature"
 import { FeedbackCard } from "@/app/components/FeedbackCard"
 import { feedbacks } from "@/app/data/feedbacks"
 import { BsTypescript } from "react-icons/bs";
+import { EcosystemCard } from "@/app/components/EcosystemCard"
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/navigation"
 import AuthModal from "@/app/components/AuthModal"
 import { FaRust } from "react-icons/fa";
 import { SiV8 } from "react-icons/si";
-
-
-
-
 
 export default function HomePage() {
   const { user, loading: userLoading } = useAuth()
@@ -41,6 +38,8 @@ export default function HomePage() {
   return (
     <>
       <VideoLoader text="Titan Planet" />
+
+
 
       <main className="relative flex min-h-[200vh] flex-col items-center overflow-x-hidden bg-background pt-24 pb-20">
 
@@ -128,7 +127,7 @@ export default function HomePage() {
             </Link>
 
             <Link
-              href="https://discord.gg/cYpB9bSY"
+              href="https://discord.gg/Dm9cD8QGUa"
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex h-10 items-center justify-center gap-2 rounded-md border border-dashed border-indigo-500/30 bg-background px-8 text-sm font-medium text-indigo-600 shadow-sm transition-colors hover:bg-indigo-500/5 hover:border-indigo-500/60 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300"
@@ -139,21 +138,21 @@ export default function HomePage() {
 
             {user?.isAdmin && (
               <Link
-                  href="/admin"
-                  className="group inline-flex h-10 items-center justify-center gap-2 rounded-md bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 px-8 text-sm font-bold transition-all hover:scale-105 active:scale-95"
+                href="/admin"
+                className="group inline-flex h-10 items-center justify-center gap-2 rounded-md bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 px-8 text-sm font-bold transition-all hover:scale-105 active:scale-95"
               >
-                  <LayoutDashboard size={16} />
-                  Admin Dashboard
+                <LayoutDashboard size={16} />
+                Admin Dashboard
               </Link>
             )}
           </motion.div>
-          <AuthModal 
-            isOpen={isAuthOpen} 
-            onClose={() => setIsAuthOpen(false)} 
+          <AuthModal
+            isOpen={isAuthOpen}
+            onClose={() => setIsAuthOpen(false)}
             onSuccess={(u) => {
               setIsAuthOpen(false);
               if (u.isAdmin) router.push('/admin');
-            }} 
+            }}
           />
         </div>
 
@@ -188,200 +187,112 @@ export default function HomePage() {
             {/* Background Glow Effect */}
             <div className="absolute inset-0 -z-10 bg-radial-[circle_at_center_center] from-primary/5 via-transparent to-transparent opacity-50 blur-3xl" />
 
-            {/* Observatory Card */}
-            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  <Telescope className="h-6 w-6" />
-                </div>
-              </div>
+            <EcosystemCard
+              icon={Telescope}
+              iconColorClass="bg-blue-500/10 text-blue-600 dark:text-blue-400"
+              category="Native Dashboard"
+              status="STABLE"
+              techBadges={[{ text: "Windows" }]}
+              title="TitanPl Observatory"
+              description="Monitor your TitanPl orbits with zero-latency desktop integration. Auto-scan local processes and debug orbits."
+              href="/observatory/download"
+              linkText="Download now →"
+            />
 
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <div className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                  Native Dashboard
-                </div>
-                <StatusBadge status="STABLE" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 px-2.5 py-0.5 text-[10px] font-medium text-zinc-700 dark:text-zinc-300">
-                  Windows
-                </div>
-              </div>
+            <EcosystemCard
+              icon={Rocket}
+              iconColorClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              category="Gravity Runtime"
+              status="STABLE"
+              title="25+ Gravity Runtime APIs"
+              description="Ready for production and growing every day. We don't build for hype; we build the tools that solve real developer pain points."
+              href="/docs/how-to-use/05-runtime-apis"
+              linkText="Explore APIs →"
+              footerIcons={[
+                { icon: RiJavascriptFill, colorClass: "text-yellow-600 dark:text-yellow-500" },
+                { icon: BsTypescript, colorClass: "text-blue-600 dark:text-blue-500" }
+              ]}
+            />
 
-              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">TitanPl Observatory</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
-                Monitor your TitanPl orbits with zero-latency desktop integration. Auto-scan local processes and debug orbits.
-              </p>
+            <EcosystemCard
+              icon={Puzzle}
+              iconColorClass="bg-purple-500/10 text-purple-600 dark:text-purple-400"
+              category="Modular"
+              status="STABLE"
+              techBadges={[
+              ]}
+              title="TitanPL Extensions"
+              description="Add modular features to any Titan project. Build reusable plugins and integrate external services."
+              href="/docs/knowledge/07-extensions"
+              linkText="Learn more →"
+              footerIcons={[
+                { icon: RiJavascriptFill, colorClass: "text-yellow-600 dark:text-yellow-500" },
+                { icon: BsTypescript, colorClass: "text-blue-600 dark:text-blue-500" }
+              ]}
+            />
 
-              <Link
-                href="/observatory/download"
-                className="inline-flex items-center text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-              >
-                Download now →
-              </Link>
-            </div>
+            <EcosystemCard
+              icon={FaRust}
+              iconColorClass="bg-orange-500/10 text-orange-600 dark:text-orange-400"
+              category="High Performance"
+              status="BETA"
 
-            {/* Runtime APIs Card */}
-            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  <Rocket className="h-6 w-6" />
-                </div>
-              </div>
+              title="Hybrid Rust Actions"
+              description="Write performance-critical logic in Native Rust. Compiled directly into the server binary for maximum speed."
+              href="/docs/how-to-use/02-actions#%EF%B8%8F-rust-actions-rs"
+              linkText="Learn more →"
+              footerIcons={[
+                { icon: RiJavascriptFill, colorClass: "text-yellow-600 dark:text-yellow-500" },
+                { icon: BsTypescript, colorClass: "text-blue-600 dark:text-blue-500" },
+                { icon: FaRust, colorClass: "text-orange-600 dark:text-orange-400" }
+              ]}
+            />
 
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <div className="inline-flex items-center rounded-full border bg-emerald-500/10 border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                  Gravity Runtime
-                </div>
-                <StatusBadge status="STABLE" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
-                  <RiJavascriptFill className="h-3 w-3" /> JS
-                </div>
-                <div className="inline-flex items-center gap-1 rounded-full border bg-blue-400/10 border-blue-400/20 px-2.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-500">
-                  <BsTypescript size={9} /> TS
-                </div>
-              </div>
+            <EcosystemCard
+              icon={Orbit}
+              iconColorClass="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
+              category="Core Architecture"
+              status="STABLE"
+              title="TitanPl Orbit System"
+              description="High-performance routing engine with constant-time resolution (O(1)) and zero degradation at scale."
+              href="/docs/knowledge/03-orbit-system"
+              linkText="Learn more →"
+              footerIcons={[
+                { icon: FaRust, colorClass: "text-orange-600 dark:text-orange-400" }
+              ]}
+            />
 
-              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">25+ Native Runtime APIs</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
-                Ready for production and growing every day. We don't build for hype; we build the tools that solve real developer pain points.
-              </p>
+            <EcosystemCard
+              icon={Cpu}
+              iconColorClass="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+              category="Runtime Engine"
+              status="STABLE"
+              title="Gravity Runtime"
+              description="Powerful JavaScript runtime built on V8. Execute your code with blazing-fast performance and native bindings."
+              href="/docs/knowledge/02-runtime-architecture"
+              linkText="Learn more →"
+              footerIcons={[
+                { icon: SiV8, colorClass: "text-yellow-600 dark:text-yellow-500" }
+              ]}
+            />
 
-              <Link
-                href="/docs/how-to-use/05-runtime-apis"
-                className="inline-flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
-              >
-                Explore APIs →
-              </Link>
-            </div>
-
-            {/* Extensions Card */}
-            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                  <Puzzle className="h-6 w-6" />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <div className="inline-flex items-center rounded-full border bg-purple-500/10 border-purple-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
-                  Modular
-                </div>
-                <StatusBadge status="STABLE" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
-                  <RiJavascriptFill className="h-3 w-3" /> JS
-                </div>
-                <div className="inline-flex items-center gap-1 rounded-full border bg-blue-400/10 border-blue-400/20 px-2.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-500">
-                  <BsTypescript size={9} /> TS
-                </div>
-              </div>
-
-              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">TitanPL Extensions</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
-                Add modular features to any Titan project. Build reusable plugins and integrate external services.
-              </p>
-
-              <Link
-                href="/docs/knowledge/07-extensions"
-                className="inline-flex items-center text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
-              >
-                Learn more →
-              </Link>
-            </div>
-
-            {/* Rust Actions Card */}
-            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400">
-                  <FaRust size={20} />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <div className="inline-flex items-center rounded-full border bg-orange-500/10 border-orange-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider">
-                  High Performance
-                </div>
-                <StatusBadge status="BETA" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
-                  <RiJavascriptFill className="h-3 w-3" /> JS
-                </div>
-                <div className="inline-flex items-center gap-1 rounded-full border bg-orange-500/10 border-orange-500/20 px-2.5 py-0.5 text-[10px] font-medium text-orange-600 dark:text-orange-400">
-                  <FaRust size={12} /> Rust
-                </div>
-              </div>
-
-              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">Hybrid Rust Actions</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
-                Write performance-critical logic in Native Rust. Compiled directly into the server binary for maximum speed.
-              </p>
-
-              <Link
-                href="/docs/how-to-use/02-actions#%EF%B8%8F-rust-actions-rs"
-                className="inline-flex items-center text-sm font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors"
-              >
-                Learn more →
-              </Link>
-            </div>
-
-            {/* Orbit System Card */}
-            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
-                  <Orbit className="h-6 w-6" />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <div className="inline-flex items-center rounded-full border bg-cyan-500/10 border-cyan-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">
-                  Core Architecture
-                </div>
-                <StatusBadge status="STABLE" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-orange-500/10 border-orange-500/20 px-2.5 py-0.5 text-[10px] font-medium text-orange-600 dark:text-orange-400">
-                  <FaRust size={12} /> Rust
-                </div>
-              </div>
-
-              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">TitanPl Orbit System</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
-                High-performance routing engine with constant-time resolution (O(1)) and zero degradation at scale.
-              </p>
-
-              <Link
-                href="/docs/knowledge/03-orbit-system"
-                className="inline-flex items-center text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
-              >
-                Learn more →
-              </Link>
-            </div>
-
-            {/* Gravity Runtime Card */}
-            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                  <Cpu className="h-6 w-6" />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <div className="inline-flex items-center rounded-full border bg-indigo-500/10 border-indigo-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-                  Runtime Engine
-                </div>
-                <StatusBadge status="STABLE" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
-                  <SiV8 size={12} /> V8
-                </div>
-              </div>
-
-              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">Gravity Runtime</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
-                Powerful JavaScript runtime built on V8. Execute your code with blazing-fast performance and native bindings.
-              </p>
-
-              <Link
-                href="/docs/knowledge/02-runtime-architecture"
-                className="inline-flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-              >
-                Learn more →
-              </Link>
-            </div>
+            {/* <EcosystemCard
+              icon={Zap}
+              iconColorClass="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+              category="Developer Experience"
+              status="BETA"
+              techBadges={[
+                { text: "TS Decorators", icon: BsTypescript, className: "bg-blue-400/10 border-blue-400/20 text-blue-600 dark:text-blue-500" }
+              ]}
+              title="@t8n/kit"
+              description="Bring NestJS-like decorators to TitanPL. Define routes as classes and let the kit handle the rest."
+              href="/kit"
+              linkText="Explore Extension →"
+              footerIcons={[
+                { icon: RiJavascriptFill, colorClass: "text-yellow-500" },
+                { icon: BsTypescript, colorClass: "text-blue-500" }
+              ]}
+            /> */}
           </div>
         </div>
 
