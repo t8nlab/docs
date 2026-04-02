@@ -1,6 +1,6 @@
 # TitanPL Documentation
 
-Official documentation for **TitanPL** v6.0.0 — A native, high-performance backend framework powered by Rust.
+Official documentation for **TitanPL** — A native, high-performance backend framework powered by Rust.
 
 ## 🌐 Live Documentation
 
