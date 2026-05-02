@@ -31,14 +31,30 @@ export const myAction = (req) => {
 ---
 
 ### The Request Object (`req`)
-Every Titan action receives a `Request` object containing details about the incoming event.
+Every Titan action receives a `Request` object containing details about the incoming event. This object is stable and serializable across all execution modes.
 
-- `method: string` — HTTP method (e.g., `GET`, `POST`).
-- `path: string` — The request path.
-- `headers: Record<string, string>` — Key-value pairs of request headers.
-- `params: Record<string, any>` — Path parameters (e.g., from `/users/:id`).
-- `query: Record<string, any>` — URL query parameters.
-- `body: any` — The parsed request body.
+- `method: string` — HTTP method (e.g., `GET`, `POST`, `PUT`, `DELETE`, `PATCH`).
+- `path: string` — The request path (e.g., `"/user/42"`).
+- `headers: Record<string, string>` — Key-value pairs of request headers (lowercased).
+- `params: Record<string, string>` — Path parameters (e.g., `id` from `/users/:id`).
+- `query: Record<string, string>` — URL query parameters (e.g., `?page=2`).
+- `body: any` — The parsed request body (automatically parsed for JSON).
+- `socketId?: string` — Unique ID for WebSocket connections.
+- `event?: "open" | "message" | "close"` — Type of WebSocket event.
+
+---
+
+### Asynchronous Orchestration (`drift`)
+Titan runs on the synchronous Gravity V8 engine. All asynchronous operations (DB, Fetch, FS) must use the `drift()` operator to suspend and resume the isolate properly.
+
+```javascript
+// Correct pattern for async calls
+export function getUsers(req) {
+  const conn = drift(t.db.connect(t.env.DATABASE_URL));
+  const users = drift(conn.query("SELECT * FROM users"));
+  return { users };
+}
+```
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
@@ -138,15 +154,62 @@ Basic network utilities.
 - `net.ip(): string` — Get the local system IP address.
 
 ### `db` (Database)
-Native interface for SQL databases (only PostgreSQL yet). Async methods require `drift()`.
+Native interface for SQL databases (PostgreSQL). Async methods require `drift()`.
 
-- `db.connect(url: string): Promise<DbConnection>` — Establish a connection.
-- `db.query(sql: string, params?: any[]): Promise<any[]>` — Run a query on the default connection.
+- `db.connect(url: string, options?: ConnectionOptions): Promise<DbConnection>` — Establish a connection with optional pooling settings.
+- `db.query(sql: string, params?: any[], options?: QueryOptions): Promise<any[]>` — Run a query on the default connection.
+
+#### `ConnectionOptions`:
+- `max: number` — Maximum number of connections in the pool (default: 16).
+- `pool_timeout: number` — Timeout in milliseconds for acquiring a connection (default: 5000).
+
+#### `QueryOptions`:
+- `timeout: number` — Timeout in milliseconds for query execution (default: 10000).
 
 #### `DbConnection` interface:
-- `query(sql: string, params?: any[]): Promise<any[]>` — Positional placeholders (`$1`, `$2`) prevent SQL injection.
+- `query(sql: string, params?: any[], options?: QueryOptions): Promise<any[]>` — Execute SQL with positional placeholders (`$1`, `$2`).
 
 
+### `types` (Type Casting API)
+The `types` API provides helper functions to explicitly mark your JavaScript values as specific database types. This ensures deterministic OID binding in prepared statements.
+
+| Function | Purpose | Example |
+| :--- | :--- | :--- |
+| `STRING(val)` | `t.types.STRING("name")` | Casts value to a standard SQL string. |
+| `NUMBER(val)` | `t.types.NUMBER(42.5)` | Casts value to a double precision number. |
+| `BOOLEAN(val)` | `t.types.BOOLEAN(true)` | Casts value to a SQL boolean. |
+| `UUID(val)` | `t.types.UUID(req.body.id)` | **Required** for UUID columns. |
+| `TIMESTAMP(val)`| `t.types.TIMESTAMP(new Date())` | Casts to a `timestamp without time zone`. |
+| `TIMESTAMPTZ(val)`| `t.types.TIMESTAMPTZ(date)` | Casts to a `timestamp with time zone`. |
+| `DATE(val)` | `t.types.DATE("2024-01-01")` | Casts to a standard SQL `date`. |
+| `JSON(val)` | `t.types.JSON({ foo: "bar" })`| **Required** for JSON and JSONB columns. |
+| `VARCHAR(val)` | `t.types.VARCHAR("short")` | Casts to a `varchar` string. |
+| `CHAR(val)` | `t.types.CHAR("A")` | Casts to a fixed-length `char`. |
+| `TEXT(val)` | `t.types.TEXT("long text...")` | Casts to a `text` column. |
+| `INT(val)` | `t.types.INT(100)` | Casts to a 32-bit integer (`int4`). |
+| `BIGINT(val)` | `t.types.BIGINT("9007199")` | Casts to a 64-bit integer (`int8`). |
+| `FLOAT(val)` | `t.types.FLOAT(1.23)` | Casts to a single precision float. |
+
+#### Implementation Example
+```javascript
+import { db, types, drift } from "@titanpl/native";
+
+export const createUser = (req) => {
+  const { id, profile, joinedAt } = req.body;
+  const conn = drift(db.connect(process.env.DATABASE_URL));
+
+  drift(conn.query(
+    "INSERT INTO users (id, profile_data, joined_at) VALUES ($1, $2, $3)",
+    [
+      types.UUID(id),             
+      types.JSON(profile),         
+      types.TIMESTAMP(joinedAt)    
+    ]
+  ));
+
+  return { success: true };
+};
+```
 
 ### `ws` (WebSockets)
 Real-time messaging utilities for TitanPl WebSocket actions.

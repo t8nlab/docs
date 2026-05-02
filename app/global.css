@@ -4,6 +4,39 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+
+/* Fix for mobile scroll and horizontal overflow */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: clip;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure all images and videos are responsive */
+img,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Prevent long strings/links from breaking layout */
+a,
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
 /* Override sidebar link background for the specific GitHub link */
 a[href="https://github.com/ezet-galaxy/titanpl"] {
     background-color: transparent !important;

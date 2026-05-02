@@ -61,7 +61,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body cz-shortcut-listen="true" className="flex flex-col min-h-screen overflow-x-hidden">
+      <body cz-shortcut-listen="true" className="flex flex-col min-h-screen">
         <RootProvider>
           <AuthProvider>
             <VersionProvider>

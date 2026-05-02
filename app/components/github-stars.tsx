@@ -25,7 +25,7 @@ export async function GithubStars() {
 
     return (
         <div
-            className="group w-full my-0.5 flex items-center gap-2 hover:rounded-lg rounded-full border border-black/5 bg-zinc-500/5 px-3 py-1.5 text-xs font-medium text-zinc-800 backdrop-blur-md transition-all hover:bg-zinc-500/10 hover:shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+            className="group w-fit my-0.5 flex items-center gap-2 hover:rounded-lg rounded-full border border-black/5 bg-zinc-500/5 px-3 py-1.5 text-xs font-medium text-zinc-800 backdrop-blur-md transition-all hover:bg-zinc-500/10 hover:shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
         >
             <div className="flex items-center gap-1.5">
                 <RiGithubFill className="h-4 w-4 opacity-70 transition-opacity group-hover:opacity-100" />

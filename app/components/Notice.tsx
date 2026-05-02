@@ -60,22 +60,22 @@ export default function Notice({
 
   return (
     <div
-      className={`w-full border px-4 py-3 ${styles.container}`}
+      className={`w-full flex justify-center border px-4 py-3 ${styles.container}`}
     >
-      <div className="flex items-start justify-center gap-1">
+      <div className="flex items-start gap-3">
         <div
-          className={`flex h-6 w-6 items-center justify-center rounded-full ${styles.iconWrap} ${styles.iconColor}`}
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${styles.iconWrap} ${styles.iconColor}`}
         >
           {styles.icon}
         </div>
 
-        <div className="space-y-1 text-sm text-zinc-300">
+        <div className="min-w-0 flex-1 space-y-1 text-sm text-zinc-300">
           {title && (
-            <p className="font-medium text-zinc-100">
+            <p className="font-medium text-zinc-100 wrap-break-word">
               {title}
             </p>
           )}
-          <div>{children}</div>
+          <div className="wrap-break-word">{children}</div>
         </div>
       </div>
     </div>

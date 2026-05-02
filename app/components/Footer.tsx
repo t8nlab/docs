@@ -109,10 +109,6 @@ export default function Footer() {
                             <Link href="/observatory/download" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Observatory
                             </Link>
-                            <Link href="/kit" className="flex gap-2 items-center text-sm text-indigo-500 dark:text-indigo-400 font-bold transition-all hover:scale-105 active:scale-95">
-                                <Zap size={14} className="animate-pulse" />
-                                TitanPL Kit
-                            </Link>
                             <Link href="/benchmark" className="flex gap-2 items-center text-sm text-zinc-500 dark:text-zinc-400 font-medium transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 <Activity size={14} />
                                 Benchmark
