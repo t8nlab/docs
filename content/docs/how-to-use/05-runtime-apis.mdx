@@ -20,7 +20,7 @@ const dbUri = t.env.DB_URI; // Maps to DB_URI in .env
 While `t` is always available globally, you can also import specific utilities for better type support and clarity:
 
 ```javascript
-import { fs, ws, crypto, os, response } from "@titanpl/native";
+import { fs, task, db, ws, crypto, response } from "@titanpl/native";
 
 export const myAction = (req) => {
   const content = fs.readFile("tanfig.json"); // Uses project root as base
@@ -169,6 +169,49 @@ Native interface for SQL databases (PostgreSQL). Async methods require `drift()`
 #### `DbConnection` interface:
 - `query(sql: string, params?: any[], options?: QueryOptions): Promise<any[]>` — Execute SQL with positional placeholders (`$1`, `$2`).
 
+### `task` (Managed Background Tasks)
+Offload long-running I/O, heavy computations, or sequential workflows to background workers with zero infrastructure overhead.
+
+- `task.spawn(key: string, actionName: string, payload?: any, options?: TaskOptions): void` — Dispatch a one-off background job. Supports built-in deduplication by key.
+- `task.enqueue(queueKey: string, actionName: string, payload?: any, options?: { timeout?: number }): void` — Native FIFO Queues. Jobs in the same queue are executed strictly one-after-another.
+- `task.status(key: string): TaskStatus | null` — Query the real-time state of any task (`pending`, `running`, `done`, or `failed`).
+- `task.stop(key: string): void` — Force-stops a task and removes its tracking entry.
+- `task.clear(queueKey: string): void` — Removes all pending jobs from a specific queue.
+
+#### `TaskOptions`:
+- `dedupe: boolean` — If true, skip if a task with this key is already active (default: true).
+- `timeout: number` — Kill task after these many milliseconds (default: 30000).
+
+#### `TaskStatus`:
+- `state: "pending" | "running" | "done" | "failed"`
+- `startedAt: number` — Unix timestamp (ms) when the task was started.
+- `duration?: number` — Execution duration in milliseconds.
+- `error?: string` — Error message if the task failed.
+
+#### Implementation Example
+```javascript
+import { task, response } from "@titanpl/native";
+
+export function onSignup(req) {
+  // Send welcome email in background
+  task.spawn(`welcome:${req.body.email}`, "send-welcome", {
+    to: req.body.email,
+    name: req.body.name
+  });
+
+  return response.json({ status: "Account created, email sending in background..." });
+}
+
+// Sequential Queue (FIFO)
+// Jobs in the same queue key run one after another, never in parallel.
+export function syncData(req) {
+  const { userId } = req.body;
+  task.enqueue(`sync:${userId}`, "fetch-page", { page: 1 });
+  task.enqueue(`sync:${userId}`, "fetch-page", { page: 2 });
+  return { enqueued: true };
+}
+```
+
 
 ### `types` (Type Casting API)
 The `types` API provides helper functions to explicitly mark your JavaScript values as specific database types. This ensures deterministic OID binding in prepared statements.
@@ -252,7 +295,11 @@ t.log(`RSS: ${(mem.rss / 1024 / 1024).toFixed(2)} MB`);
 - `time.timestamp(): string` — Returns the current time as an ISO 8601 string (e.g., `"2026-01-15T12:30:45.123Z"`).
 
 
-### `ls` (Persistent Local Storage)
+### `ls` (Persistent Local Storage) [DEPRECATED]
+<Callout type="warn">
+  `t.ls` is deprecated. For high-performance, RAM-based key-value storage with near-zero latency, **use `t.shareContext`**.
+</Callout>
+
 High-performance key-value storage persisted to disk.
 
 - `ls.get(key: string): string|null` — Retrieve a string value.
@@ -276,10 +323,10 @@ High-performance key-value storage persisted to disk.
 - `cookies.get(req: object, name: string): string|null` — Extract cookie value from request.
 - `cookies.set(res: object, name: string, value: string, options?: object): void` — Attach `Set-Cookie` to response.
 
-### `shareContext` (Global Context)
-An interface for sharing state between different threads and broadcasting events.
+### `shareContext` (Memory Cache / Shared State)
+High-performance, RAM-based key-value storage. Use this as a **Redis-like cache** for high-speed data access and sharing state between different isolates/threads.
 
-- `shareContext.get(key: string): any` — Retrieve stored context.
+- `shareContext.get(key: string): any` — Retrieve stored context from memory.
 - `shareContext.set(key: string, value: any): void` — Set context value.
 - `shareContext.delete(key: string): void` — Delete a context key.
 - `shareContext.keys(): string[]` — List all stored keys.

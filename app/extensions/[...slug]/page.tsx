@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -28,6 +28,11 @@ import {
     RiGlobalLine,
     RiLoader4Line,
     RiBookOpenFill,
+    RiFireFill,
+    RiLightbulbFill,
+    RiInformationFill,
+    RiAlertFill,
+    RiErrorWarningFill,
 } from "@remixicon/react";
 
 /* ─── Types ─── */
@@ -247,30 +252,35 @@ export default function ExtensionDetailPage() {
                                             code({ className, children, ...props }) {
                                                 const match = /language-(\w+)/.exec(className || "");
                                                 const rawCode = String(children).replace(/\n$/, "");
-                                                if (match) {
-                                                    // Extract filename from first-line comment like: // app/actions/signup.js or # config.py
+                                                // If it has a language- class, it's definitely a code block
+                                                const isCodeBlock = !!match || (className && className.includes('language-'));
+                                                const isInline = !isCodeBlock && !rawCode.includes('\n');
+
+                                                if (!isInline) {
+                                                    // Extract filename from first-line comment
                                                     const lines = rawCode.split("\n");
                                                     const firstLine = lines[0]?.trim() || "";
                                                     const fileMatch = firstLine.match(/^(?:\/\/|#|\/\*)\s*([\w.\/\-@]+\.\w+)\s*\*?\/?$/);
                                                     const fileName = fileMatch ? fileMatch[1] : null;
                                                     const displayCode = fileName ? lines.slice(1).join("\n").replace(/^\n/, "") : rawCode;
+                                                    const lang = match ? match[1] : "txt";
 
                                                     return (
-                                                        <div className="ext-codeblock">
+                                                        <div className="ext-codeblock group">
                                                             <div className="ext-codeblock-header">
                                                                 <div className="flex items-center gap-2">
                                                                     <RiCodeLine size={13} className="text-gray-500" />
                                                                     {fileName ? (
                                                                         <span className="text-[11px] font-bold text-gray-400 tracking-wide">{fileName}</span>
                                                                     ) : (
-                                                                        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{match[1]}</span>
+                                                                        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{lang}</span>
                                                                     )}
                                                                 </div>
                                                                 <InlineCopyBtn text={displayCode} />
                                                             </div>
                                                             <SyntaxHighlighter
                                                                 style={oneDark}
-                                                                language={match[1]}
+                                                                language={lang}
                                                                 PreTag="div"
                                                                 codeTagProps={{ style: { background: "none" } }}
                                                                 customStyle={{
@@ -287,7 +297,97 @@ export default function ExtensionDetailPage() {
                                                         </div>
                                                     );
                                                 }
-                                                return <code className={className} {...props}>{children}</code>;
+
+                                                return (
+                                                    <code className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[0.9em] font-medium mx-0.5" {...props}>
+                                                        {children}
+                                                    </code>
+                                                );
+                                            },
+                                            blockquote({ children }) {
+                                                // Helper to get text content from React children
+                                                const getRawText = (node: any): string => {
+                                                    if (typeof node === 'string') return node;
+                                                    if (Array.isArray(node)) return node.map(getRawText).join('');
+                                                    if (node?.props?.children) return getRawText(node.props.children);
+                                                    return '';
+                                                };
+
+                                                const fullText = getRawText(children).trim();
+                                                let type: 'note' | 'tip' | 'important' | 'warning' | 'deprecated' = 'note';
+
+
+                                                if (fullText.startsWith('[!TIP]')) type = 'tip';
+                                                else if (fullText.startsWith('[!IMPORTANT]')) type = 'important';
+                                                else if (fullText.startsWith('[!WARNING]') || fullText.startsWith('[!CAUTION]')) type = 'warning';
+                                                else if (fullText.startsWith('[!DEPRECATED]')) type = 'deprecated';
+                                                else if (fullText.startsWith('[!NOTE]') || fullText.startsWith('[!INFO]')) type = 'note';
+
+                                                // Determine styles and icon
+                                                const configs = {
+                                                    tip: {
+                                                        icon: <RiLightbulbFill size={24} />,
+                                                        color: "text-emerald-400",
+                                                        bg: "bg-emerald-500/5",
+                                                        border: "border-emerald-500/10",
+                                                        shadow: "shadow-[0_0_50px_-20px_rgba(16,185,129,0.1)]"
+                                                    },
+                                                    important: {
+                                                        icon: <RiAlertFill size={24} />,
+                                                        color: "text-indigo-400",
+                                                        bg: "bg-indigo-500/5",
+                                                        border: "border-indigo-500/10",
+                                                        shadow: "shadow-[0_0_50px_-20px_rgba(99,102,241,0.1)]"
+                                                    },
+                                                    warning: {
+                                                        icon: <RiErrorWarningFill size={24} />,
+                                                        color: "text-amber-400",
+                                                        bg: "bg-amber-500/5",
+                                                        border: "border-amber-500/10",
+                                                        shadow: "shadow-[0_0_50px_-20px_rgba(245,158,11,0.1)]"
+                                                    },
+                                                    deprecated: {
+                                                        icon: <RiFireFill size={24} />,
+                                                        color: "text-red-400",
+                                                        bg: "bg-red-500/5",
+                                                        border: "border-red-500/10",
+                                                        shadow: "shadow-[0_0_50px_-20px_rgba(239,68,68,0.1)]"
+                                                    },
+                                                    note: {
+                                                        icon: <RiInformationFill size={24} />,
+                                                        color: "text-blue-400",
+                                                        bg: "bg-blue-500/5",
+                                                        border: "border-blue-500/10",
+                                                        shadow: "shadow-[0_0_50px_-20px_rgba(59,130,246,0.1)]"
+                                                    }
+                                                };
+
+                                                const config = configs[type];
+
+                                                // Clean up the text by removing the prefix from the children
+                                                const cleanChildren = React.Children.map(children, (child: any) => {
+                                                    if (React.isValidElement(child) && (child.props as any).children) {
+                                                        const grandChildren = React.Children.map((child.props as any).children, (grandChild: any) => {
+                                                            if (typeof grandChild === 'string') {
+                                                                return grandChild.replace(/^\[!(TIP|IMPORTANT|WARNING|CAUTION|DEPRECATED|NOTE|INFO)\]\s*/i, '');
+                                                            }
+                                                            return grandChild;
+                                                        });
+                                                        return React.cloneElement(child as any, { children: grandChildren });
+                                                    }
+                                                    return child;
+                                                });
+
+                                                return (
+                                                    <div className={`my-8 px-4 pt-3 rounded-xl border ${config.border} ${config.bg} flex gap-5 items-start transition-all hover:brightness-110 ${config.shadow}`}>
+                                                        <div className={`${config.color} shrink-0`}>
+                                                            {config.icon}
+                                                        </div>
+                                                        <div className="text-[15px] text-gray-300 leading-relaxed font-medium alert-content [&>p]:m-0">
+                                                            {cleanChildren}
+                                                        </div>
+                                                    </div>
+                                                );
                                             },
                                             a({ href, children, ...props }) {
                                                 return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;
@@ -462,7 +562,7 @@ function InlineCopyBtn({ text }: { text: string }) {
     return (
         <button onClick={() => { navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 2000); }}
             className="p-1 rounded hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100">
-            {done ? <RiCheckLine size={13} className="text-emerald-400" /> : <RiFileCopyLine size={13} className="text-gray-600" />}
+            {done ? <RiCheckLine size={16} className="text-emerald-400" /> : <RiFileCopyLine size={16} className="text-gray-400" />}
         </button>
     );
 }

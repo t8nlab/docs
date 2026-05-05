@@ -157,10 +157,10 @@ export default function HomePage() {
         </div>
 
 
-        <div ref={videoContainerRef} className="relative w-full min-h-[40vh] flex items-center justify-center py-10">
+        <div ref={videoContainerRef} className="relative w-full min-h-[60vh] flex items-center justify-center py-24">
           <motion.div
-            style={{ scale, opacity, borderRadius: "1.5rem" }}
-            className="relative w-full max-w-4xl aspect-video overflow-hidden shadow-2xl backdrop-blur border bg-background/40"
+            style={{ scale, opacity, borderRadius: "2.5rem" }}
+            className="relative w-full max-w-5xl aspect-16/10 overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] dark:shadow-[0_32px_64px_-12px_rgba(255,255,255,0.1)] backdrop-blur border border-white/10 bg-background/40"
           >
             <video
               src="/titan-anime.mp4"
@@ -168,7 +168,7 @@ export default function HomePage() {
               loop
               muted
               playsInline
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover scale-[1] -translate-y-[14%]"
             />
             <div className="absolute inset-0 bg-linear-to-t from-background/20 to-transparent pointer-events-none" />
           </motion.div>
