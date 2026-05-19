@@ -1,0 +1,204 @@
+---
+title: 09. Monorepo Contribution Guide
+description: Deep dive into the TitanPL monorepo folder architecture and step-by-step instructions on implementing native features.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Folder, File, Files } from 'fumadocs-ui/components/files';
+import { GitPullRequest, Code2, Terminal, Cpu } from "lucide-react";
+
+# Contributing to TitanPL Core
+
+Welcome to the TitanPL contributor guide! This page outlines the internal architecture of the monorepo and walks you through implementing, registering, and binding a native feature.
+
+---
+
+## 🏗️ Monorepo Folder Architecture
+
+TitanPL is structured as a monorepo containing the native Rust core, the V8 runtime engine, and the JavaScript toolchain packages.
+
+<Files>
+  <Folder name="titanpl" defaultOpen>
+    <Folder name="engine" defaultOpen>
+      <File name="Cargo.toml" />
+      <File name="src/ (Server, Axum routing, request/response lifecycle)" />
+    </Folder>
+    <Folder name="gravity" defaultOpen>
+      <File name="Cargo.toml" />
+      <File name="src/ (V8 isolate pool, drift execution mapping, Rust API bindings)" />
+    </Folder>
+    <Folder name="packages" defaultOpen>
+      <Folder name="cli">
+        <File name="package.json" />
+        <File name="bin/ (commands: init, dev, build, update)" />
+      </Folder>
+      <Folder name="native" defaultOpen>
+        <File name="index.js (global object mapping, t.task / t.db exports)" />
+        <File name="index.d.ts (TypeScript declarations & JSDoc)" />
+      </Folder>
+      <Folder name="packet">
+        <File name="package.json" />
+        <File name="src/ (esbuild-based actions bundler)" />
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
+
+### 1. `engine/` (Native Rust Core)
+The native engine handles host operations, serving as the entrypoint:
+* Serves the HTTP server (Axum/Hyper).
+* Manages low-level routing and parameter extraction.
+* Dispatches requests to the V8 worker thread pool.
+* Interfaces with the Gravity JS/TS runtime.
+
+### 2. `gravity/` (V8 JS/TS Runtime)
+Gravity manages the Javascript execution layer:
+* Bootstraps the V8 engine, contexts, and isolate lifecycles.
+* Orchestrates `drift` synchronous execution suspension (fibers).
+* Implements native bridge APIs (e.g., file system, cryptography, database connections, background tasks).
+
+### 3. `packages/` (Workspace Packages)
+* **`cli/`**: The command line interface (`@titanpl/cli`).
+* **`native/`**: The JavaScript client wrapper and declaration files (`@titanpl/native`).
+* **`packet/`**: The action compiler and bundler pipeline (`@titanpl/packet`).
+
+---
+
+## 🚀 Adding a Native Feature (Step-by-Step)
+
+Adding a native feature requires mapping Rust logic to V8 callbacks, registering it inside the isolate bootstrapping phase, and wrapping it in JavaScript bindings.
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-8">
+  <div className="p-6 rounded-xl border bg-card/50">
+    <div className="flex items-center gap-3 mb-4 text-orange-500">
+      <Cpu className="h-6 w-6" />
+      <h3 className="font-bold underline underline-offset-4">1. Rust Feature</h3>
+    </div>
+    <p className="text-sm text-muted-foreground">
+      Implement native logic inside `gravity` conforming to V8 callback conventions.
+    </p>
+  </div>
+  <div className="p-6 rounded-xl border bg-card/50">
+    <div className="flex items-center gap-3 mb-4 text-blue-500">
+      <Code2 className="h-6 w-6" />
+      <h3 className="font-bold underline underline-offset-4">2. V8 Bindings</h3>
+    </div>
+    <p className="text-sm text-muted-foreground">
+      Register the native callback onto the global template during bootstrapping.
+    </p>
+  </div>
+  <div className="p-6 rounded-xl border bg-card/50">
+    <div className="flex items-center gap-3 mb-4 text-emerald-500">
+      <Terminal className="h-6 w-6" />
+      <h3 className="font-bold underline underline-offset-4">3. JS & TS Layer</h3>
+    </div>
+    <p className="text-sm text-muted-foreground">
+      Expose clean JS wrappers and TS typings in the `@titanpl/native` package.
+    </p>
+  </div>
+</div>
+
+### Step 1: Implement the Feature in Rust
+
+Implement the native core logic inside the `gravity` crate. It must adhere to the V8 callback signature.
+
+```rust
+// gravity/src/extensions/my_feature.rs
+
+pub fn my_native_callback(
+    scope: &mut v8::HandleScope,
+    args: v8::FunctionCallbackInfo,
+    mut retval: v8::ReturnValue,
+) {
+    // 1. Argument parsing & validation
+    if args.length() < 1 {
+        let error_msg = v8::String::new(scope, "Missing argument").unwrap();
+        let exception = v8::Exception::error(scope, error_msg);
+        scope.throw_exception(exception);
+        return;
+    }
+
+    let input_val = args.get(0);
+    let input_str = input_val.to_rust_string_lossy(scope);
+
+    // 2. Perform native core operation
+    let processed_str = format!("Native Titan response to: {}", input_str);
+
+    // 3. Set return value
+    let v8_response = v8::String::new(scope, &processed_str).unwrap();
+    retval.set(v8_response.into());
+}
+```
+
+### Step 2: Register the Feature in V8
+
+Expose your callback onto the V8 global context template inside the bootstrap pipeline.
+
+```rust
+// gravity/src/bootstrap.rs
+
+use crate::extensions::my_feature::my_native_callback;
+
+pub fn bootstrap_globals(scope: &mut v8::HandleScope, global: v8::Local<v8::Object>) {
+    // Bind your Rust function callback to a V8 Function Template
+    let fn_name = v8::String::new(scope, "__native_my_feature").unwrap();
+    let fn_template = v8::FunctionTemplate::new(scope, my_native_callback);
+    let fn_val = fn_template.get_function(scope).unwrap();
+    
+    // Attach to the global object template
+    global.set(scope, fn_name.into(), fn_val.into());
+}
+```
+
+### Step 3: Create JS Bindings & TS Typings
+
+Expose the new function cleanly through the `@titanpl/native` library.
+
+1. **JavaScript Wrapper**:
+   ```javascript
+   // packages/native/src/index.js
+
+   export const myFeature = {
+       process(data) {
+           // Invokes the native global V8 binding
+           return globalThis.__native_my_feature(data);
+       }
+   };
+   ```
+
+2. **TypeScript Typings & JSDoc**:
+   Add typings so users get auto-completion and documentation directly in their editors.
+   ```typescript
+   // packages/native/index.d.ts
+
+   export namespace myFeature {
+       /**
+        * Processes the given string using TitanPL's native engine.
+        * @param data The input string to process.
+        * @returns The formatted native response.
+        */
+       function process(data: string): string;
+   }
+   ```
+
+---
+
+## 🧪 Testing Your Contributions
+
+Before pushing changes or submitting PRs:
+
+1. **Build the Native Engine**:
+   Compile the rust workspace:
+   ```bash
+   cargo build --workspace
+   ```
+2. **Link Development Packages**:
+   Use package manager workspaces to link local modifications to your test apps.
+3. **Execute Test Cases**:
+   ```bash
+   npm run test
+   ```
+
+<Callout type="info">
+  Always double-check that JSDoc block comments match the native behaviors to keep type definitions accurate!
+</Callout>

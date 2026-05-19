@@ -160,31 +160,52 @@ Titan automatically resolves this to:
 
 No imports or wiring are required.
 
+### 📁 Nested Route Organization & Recursive Discovery
+
+You can organize your actions into subfolders to keep your codebase clean and structured:
+
+```js title="app.js"
+t.post("/auth/login").action("auth/login")
+```
+
+The bundler recursively scans `app/actions/` and bundles each action into its exact nested location under `dist/actions/` (e.g., compiling `app/actions/auth/login.js` into `dist/actions/auth/login.jsbundle`).
+
+### 🧼 Clean Slashes Mapping
+
+Route definitions automatically normalize paths to prevent registration failures. Both options below are matched to `"auth/login"`, aligning trailing, internal, and back/forward slashes with the compiled action bundle paths:
+
+```js title="app.js"
+t.post("/auth/login").action("auth/login.js") // Auto-normalized to "auth/login"
+t.post("/auth/register").action("auth/register") // Normalizes trailing and internal slashes
+```
+
 <Callout title="Naming Convention Warning" type="warn">
-  You **MUST** ensure the following match exactly:
-  1. The **file name** in `app/actions` (e.g., `getUser.ts`)
-  2. The **route reference** in `app.js` (e.g., `.action("getUser")`)
+  You **MUST** ensure the following match:
+  1. The relative **file path and name** in `app/actions` (e.g., `auth/login.js`)
+  2. The **route reference** in `app.js` (e.g., `.action("auth/login")`)
   
-  Titan uses this convention to automatically wire your application. If they do not match, the action will not be found.
+  Titan uses this convention to automatically wire your application. If the resolved name does not match, the action will not be found.
 </Callout>
 
 ---
 
 ## Action file structure
 
-Actions live in the `app/actions` directory.
+Actions live in the `app/actions` directory and can be nested arbitrarily.
 
 <Files>
   <Folder name="app" defaultOpen>
     <File name="app.js" />
     <Folder name="actions" defaultOpen>
+      <Folder name="auth" defaultOpen>
+        <File name="login.js" />
+        <File name="logout.ts" />
+      </Folder>
       <File name="getUser.ts" />
       <File name="compute.rs" />
-      <File name="login.js" />
     </Folder>
   </Folder>
 </Files>
-
 
 Each file exports a single function. In JavaScript/TypeScript, it's the `run` or default export. In Rust, it's the `run` function.
 

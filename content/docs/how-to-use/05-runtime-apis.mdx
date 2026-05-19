@@ -172,20 +172,22 @@ Native interface for SQL databases (PostgreSQL). Async methods require `drift()`
 ### `task` (Managed Background Tasks)
 Offload long-running I/O, heavy computations, or sequential workflows to background workers with zero infrastructure overhead.
 
-- `task.spawn(key: string, actionName: string, payload?: any, options?: TaskOptions): void` — Dispatch a one-off background job. Supports built-in deduplication by key.
+- `task.spawn(key: string, actionName: string, payload?: any, options?: TaskOptions): void` — Dispatch a one-off background job. Supports built-in deduplication by key, instant execution, and cooldown-based rate-limiting.
 - `task.enqueue(queueKey: string, actionName: string, payload?: any, options?: { timeout?: number }): void` — Native FIFO Queues. Jobs in the same queue are executed strictly one-after-another.
-- `task.status(key: string): TaskStatus | null` — Query the real-time state of any task (`pending`, `running`, `done`, or `failed`).
+- `task.status(key: string): TaskStatus | null` — Query the real-time state of any task (`pending`, `running`, `done`, or `failed`), including active rate-limiting cooldown info.
 - `task.stop(key: string): void` — Force-stops a task and removes its tracking entry.
 - `task.clear(queueKey: string): void` — Removes all pending jobs from a specific queue.
 
 #### `TaskOptions`:
 - `dedupe: boolean` — If true, skip if a task with this key is already active (default: true).
 - `timeout: number` — Kill task after these many milliseconds (default: 30000).
+- `delay: number` — Active rate-limiting cooldown window in milliseconds. Tasks spawn and execute **immediately** (no blocking/sleeping delays), but subsequent spawns for the same key will be rejected if triggered within this cooldown window.
 
 #### `TaskStatus`:
 - `state: "pending" | "running" | "done" | "failed"`
 - `startedAt: number` — Unix timestamp (ms) when the task was started.
 - `duration?: number` — Execution duration in milliseconds.
+- `delayRemaining?: number` — Remaining milliseconds of the active rate-limiting cooldown window.
 - `error?: string` — Error message if the task failed.
 
 #### Implementation Example
